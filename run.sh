@@ -14,4 +14,4 @@ echo "getting rid of old log"
 ip_addr="$(ifconfig eth0 | grep "inet " | awk '{print $2}')"
 
 echo "starting server"
-sudo nohup sudo ./server $ip_addr &
+nohup sudo ./server $ip_addr &
