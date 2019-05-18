@@ -11,5 +11,7 @@ go build
 echo "getting rid of old log"
 /bin/rm -f nohup.out
 
+ip_addr="$(ifconfig eth0 | grep "inet " | awk '{print $2}')"
+
 echo "starting server"
-sudo nohup sudo ./server &
+sudo nohup sudo ./server $ip_addr &

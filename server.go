@@ -16,7 +16,7 @@ import (
 
 // Globals----------------------------------------------------------------
 
-const csvPath = "/home/ec2-user/server/static/sbc/versions.csv"
+const csvPath = "/home/ubuntu/server/static/versions.csv"
 var piConn net.Conn
 
 // Message Structs--------------------------------------------------------
@@ -200,9 +200,9 @@ func setupRoutes() {
 	http.Handle("/", http.FileServer(http.Dir("static/")))
 	
 	// Post's
-	http.HandleFunc("/sbc/updateVersion", updateVersion)
-	http.HandleFunc("/sbc/addUnit", addUnit)
-	http.HandleFunc("/sbc/removeUnit", removeUnit)
+	http.HandleFunc("/updateVersion", updateVersion)
+	http.HandleFunc("/addUnit", addUnit)
+	http.HandleFunc("/removeUnit", removeUnit)
 	
 	err := http.ListenAndServe(":80", nil)
 	checkError("http server crashed", err)
@@ -240,8 +240,8 @@ func handleConnection(conn net.Conn) {
 	piConn = conn
 }
 
-func tcpServer() {
-	l, err := net.Listen("tcp", "172.31.41.193:3000")
+func tcpServer(ip string) {
+	l, err := net.Listen("tcp", ip + ":3000")
 	checkError("couldnt open tcp socket", err)
 	defer l.Close()
 	log("tcp server listening on port 3000")
@@ -256,7 +256,8 @@ func tcpServer() {
 
 
 func main() {
+	ip := os.Args[1]
 	log("Starting server")
-	go tcpServer()
+	go tcpServer(ip)
 	setupRoutes()
 }
