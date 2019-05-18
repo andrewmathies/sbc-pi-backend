@@ -1,0 +1,114 @@
+Starting server
+
+tcp server listening on port 3000
+
+update version endpoint hit
+
+POST /sbc/updateVersion HTTP/1.1
+Host: saturten.com
+Accept: application/json, text/javascript, */*; q=0.01
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: keep-alive
+Content-Length: 61
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Dnt: 1
+Origin: http://saturten.com
+Referer: http://saturten.com/sbc/
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36
+X-Forwarded-For: 209.141.53.254
+X-Real-Ip: 209.141.53.254
+X-Requested-With: XMLHttpRequest
+
+{"header":"updateVersion","version":"2.15","id":"_xigy5xpff"}
+
+units written to disk
+
+update version endpoint hit
+
+POST /sbc/updateVersion HTTP/1.1
+Host: saturten.com
+Accept: application/json, text/javascript, */*; q=0.01
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: keep-alive
+Content-Length: 61
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Dnt: 1
+Origin: http://saturten.com
+Referer: http://saturten.com/sbc/
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36
+X-Forwarded-For: 209.141.53.254
+X-Real-Ip: 209.141.53.254
+X-Requested-With: XMLHttpRequest
+
+{"header":"updateVersion","version":"2.21","id":"_awtr4lxn0"}
+
+units written to disk
+
+add unit endpoint hit
+
+POST /sbc/addUnit HTTP/1.1
+Host: saturten.com
+Accept: application/json, text/javascript, */*; q=0.01
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: keep-alive
+Content-Length: 58
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Dnt: 1
+Origin: http://saturten.com
+Referer: http://saturten.com/sbc/
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36
+X-Forwarded-For: 209.141.53.254
+X-Real-Ip: 209.141.53.254
+X-Requested-With: XMLHttpRequest
+
+{"header":"addUnit","id":"_4n5wgah7v","beanID":"12345678"}
+
+add unit change written to disk
+
+update version endpoint hit
+
+POST /sbc/updateVersion HTTP/1.1
+Host: saturten.com
+Accept: application/json, text/javascript, */*; q=0.01
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: keep-alive
+Content-Length: 61
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Dnt: 1
+Origin: http://saturten.com
+Referer: http://saturten.com/sbc/
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36
+X-Forwarded-For: 209.141.53.254
+X-Real-Ip: 209.141.53.254
+X-Requested-With: XMLHttpRequest
+
+{"header":"updateVersion","version":"2.21","id":"_4n5wgah7v"}
+
+units written to disk
+
+remove unit endpoint hit
+
+POST /sbc/removeUnit HTTP/1.1
+Host: saturten.com
+Accept: application/json, text/javascript, */*; q=0.01
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: keep-alive
+Content-Length: 41
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Dnt: 1
+Origin: http://saturten.com
+Referer: http://saturten.com/sbc/
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36
+X-Forwarded-For: 209.141.53.254
+X-Real-Ip: 209.141.53.254
+X-Requested-With: XMLHttpRequest
+
+{"header":"removeUnit","id":"_awtr4lxn0"}
+
+units written to disk
+

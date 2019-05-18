@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous">
+    </script>
+    <script src="manage.js"></script>
+  </head>
+
+  <body>
+
+    <h1>SBCs</h1>
+
+    <!-- <input id="fileUpload" type="file"> 
+    <form enctype="multipart/form-data" method="post" action="upload">  
+      <input id="fileInput" name="versionFile" type="file" />
+      <input id="submitButton" type="submit" value="Upload File"/>
+    </form>
+-->
+
+	<p>Enter Bean ID Here:</p>
+	<input id="beanID" type="text"></input>
+	<button id="addButton" type="button">Add Unit</button>
+	<button id="removeButton" type="button">Remove Unit</button>
+
+    <table id="dictTable">
+      <thead>
+        <tr>
+          <th>Unit</th>
+          <th>Current Version</th>
+		  <th>Bean ID</th>
+        </tr>
+	  </thead>
+      
+	  <tbody></tbody>
+    </table>
+
+  </body>
+</html>
+
