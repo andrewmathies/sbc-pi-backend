@@ -15,5 +15,3 @@ ip_addr="$(ifconfig eth0 | grep "inet " | awk '{print $2}')"
 
 echo "starting server"
 nohup ./sbc-pi-backend $ip_addr &
-
-sleep 4
