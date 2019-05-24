@@ -7,8 +7,8 @@ $(document).ready(function() {
   $('#addButton').click(function() {
 	let beanID = $('#beanID').val()
     
-	if (beanID.length !== 8 || isNaN(beanID)) {
-		alert('Please enter a valid bean ID. Must be an 8 digit number.')
+	if (beanID.length !== 8) {
+		alert('Please enter a valid bean ID. Must be an 8 digit value.')
 		return
 	}
 

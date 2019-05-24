@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/server
+cd //server
 
 echo "killing server process"
 sudo pkill server
