@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd sbc-pi-backend
+
 echo "killing server process"
 pkill server
 
