@@ -1,9 +1,9 @@
 #!/bin/bash
 
-cd //server
+cd /home/ubuntu/sbc-pi-backend
 
 echo "killing server process"
-sudo pkill server
+pkill server
 
 echo "building new server binary"
 go build
@@ -14,4 +14,4 @@ echo "getting rid of old log"
 ip_addr="$(ifconfig eth0 | grep "inet " | awk '{print $2}')"
 
 echo "starting server"
-nohup sudo ./server $ip_addr &
+nohup /home/ubuntu/sbc-pi-backend/server $ip_addr &

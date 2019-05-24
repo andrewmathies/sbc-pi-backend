@@ -4,19 +4,20 @@ FROM ubuntu:18.04
 RUN apt-get update
 RUN apt-get -y upgrade
 RUN apt-get install -y git
+RUN apt-get install net-tools
 
 # get repo
-RUN git clone https://github.com/andrewmathies/aaaaaaaaaaaaaaa.git
+RUN git clone https://github.com/andrewmathies/sbc-pi-backend.git 
 
 # download go
-CMD ["aaaaaaaaaaaaaaa/setup.sh"]
+CMD ["sbc-pi-backend/setup.sh"]
 
 # setup gopath
 RUN export GOROOT=/usr/local/go
-RUN export GOPATH=/home/ubuntu/server
+RUN export GOPATH=/
 RUN export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 # build and start server
-CMD ["aaaaaaaaaaaaaaa/run.sh"]
+CMD ["sbc-pi-backend/run.sh"]
 
-EXPOSE 22 80 3000
+EXPOSE 80 3000
