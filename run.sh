@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd /home/ubuntu/sbc-pi-backend
-
 echo "killing server process"
 pkill server
 
@@ -14,4 +12,4 @@ echo "getting rid of old log"
 ip_addr="$(ifconfig eth0 | grep "inet " | awk '{print $2}')"
 
 echo "starting server"
-nohup /home/ubuntu/sbc-pi-backend/server $ip_addr &
+nohup server $ip_addr &
