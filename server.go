@@ -16,7 +16,7 @@ import (
 
 // Globals----------------------------------------------------------------
 
-const csvPath = "/home/ubuntu/server/static/versions.csv"
+const csvPath = "/go/sbc-pi-backend/static/versions.csv"
 var piConn net.Conn
 
 // Message Structs--------------------------------------------------------
@@ -256,6 +256,11 @@ func tcpServer(ip string) {
 
 
 func main() {
+	if len(os.Args) == 0 {
+		fmt.Println("no ip specified!")
+		return
+	}
+	
 	ip := os.Args[1]
 	log("Starting server")
 	go tcpServer(ip)
