@@ -17,7 +17,7 @@ import (
 // Globals----------------------------------------------------------------
 
 const csvPath = "/go/sbc-pi-backend/static/versions.csv"
-var piConn net.Conn
+//var piConn net.Conn
 
 // Message Structs--------------------------------------------------------
 
@@ -69,6 +69,7 @@ func formatRequest(r *http.Request) {
 }
 
 func routeToPi(r io.Reader) {
+	/*
 	if piConn != nil {
 		body, err := ioutil.ReadAll(r)
 		checkError("routeToPi, reading body", err)
@@ -76,6 +77,7 @@ func routeToPi(r io.Reader) {
 		readBuf := bytes.NewBuffer(body)
 		piConn.Write(readBuf.Bytes())
 	}
+	*/
 }
 
 func getUnits(id string, version string, operation Msg) [][]string {
@@ -207,7 +209,7 @@ func setupRoutes() {
 	err := http.ListenAndServe(":80", nil)
 	checkError("http server crashed", err)
 }
-
+/*
 func handleConnection(conn net.Conn) {
 	buf := make([]byte, 128)
 	
@@ -253,16 +255,9 @@ func tcpServer(ip string) {
 		defer conn.Close()
 	}
 }
-
+*/
 
 func main() {
-	if len(os.Args) == 0 {
-		fmt.Println("no ip specified!")
-		return
-	}
-	
-	ip := os.Args[1]
 	log("Starting server")
-	go tcpServer(ip)
 	setupRoutes()
 }

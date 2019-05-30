@@ -1,16 +1,11 @@
-FROM golang
+FROM golang:1.8
 
-# update os software
-RUN apt-get update
-RUN apt-get -y upgrade
-RUN apt-get install -y git
-RUN apt-get install net-tools
+WORKDIR /go/src/app
+COPY . .
 
-# get repo
-RUN git clone https://github.com/andrewmathies/sbc-pi-backend.git 
+RUN apt-get update && apt-get -y upgrade
 
-# build and start server
-RUN nohup bash -c "sbc-pi-backend/run.sh &" && sleep 4
-#CMD ["sbc-pi-backend/run.sh"]
+RUN go get -d -v ./...
+RUN go install -v ./...
 
-EXPOSE 80 3000
+CMD ["sbc-pi-backend"]
