@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"bytes"
-	"strings"
 	"io"
 	"io/ioutil"
 	"encoding/json"
@@ -17,7 +15,8 @@ import (
 // Globals----------------------------------------------------------------
 
 const csvPath = "/go/sbc-pi-backend/static/versions.csv"
-//var piConn net.Conn
+
+var dict map[string]Unit
 
 // Message Structs--------------------------------------------------------
 
@@ -38,12 +37,17 @@ type UpdateMsg struct {
 	ID string `json:"id"`
 }
 
+type Unit struct {
+	Version string `json:"version"`
+	BeanID 	string `json:"beanID"`
+}
+
 // Enum-------------------------------------------------------------------
 
 type Msg int
 
 const (
-	Add		Msg = 0
+	Add	Msg = 0
 	Remove	Msg = 1
 	Update	Msg = 2
 )
@@ -163,6 +167,8 @@ func addUnit(w http.ResponseWriter, r *http.Request) {
 	marshalErr := json.Unmarshal(body, &msg)
 	checkError("parsing json from raw data", marshalErr)
 	
+	unit = Unit{msg.BeanID, ""}
+
 	routeToPi(&copyBuf)
 
 	file, err := os.OpenFile(csvPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
@@ -209,55 +215,9 @@ func setupRoutes() {
 	err := http.ListenAndServe(":80", nil)
 	checkError("http server crashed", err)
 }
-/*
-func handleConnection(conn net.Conn) {
-	buf := make([]byte, 128)
-	
-	_, err := conn.Read(buf)
-	checkError("couldnt read tcp message from client", err)
-
-	log("established tcp connection. client says: " + string(buf))
-
-	// send dict to the pi client that just connected to us
-	file, openErr := os.OpenFile(csvPath, os.O_RDONLY, 0666)
-	checkError("opening csv file, tcp connection established", openErr)
-	defer file.Close()
-	reader := csv.NewReader(file)
-
-	for {
-		line, readErr := reader.Read()
-
-		if readErr == io.EOF {
-			break
-		}
-		checkError("reading csv file, tcp connection established", readErr)
-
-		lineString := strings.Join(line, ",")
-		log("read: " + lineString)
-
-		_, tcpErr := conn.Write([]byte(lineString))
-		checkError("sending unit info to new tcp connection", tcpErr)
-	}
-
-	piConn = conn
-}
-
-func tcpServer(ip string) {
-	l, err := net.Listen("tcp", ip + ":3000")
-	checkError("couldnt open tcp socket", err)
-	defer l.Close()
-	log("tcp server listening on port 3000")
-
-	for {
-		conn, err := l.Accept()
-		checkError("trouble establishing connection", err)
-		go handleConnection(conn)
-		defer conn.Close()
-	}
-}
-*/
 
 func main() {
+	dict = make(map[string]Unit)
 	log("Starting server")
 	setupRoutes()
 }
