@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
-	"html"
 	"log"
 	"context"
 	"crypto/tls"
-	"flag"
-	"io"
 	"time"
 
 	"golang.org/x/crypto/acme/autocert"
@@ -51,6 +48,8 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func makeHTTPServer() *http.Server {
+	log.Println("building server")
+
 	router := &http.ServeMux{}
 	//mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/unit/{beanID}", unitHandler)
@@ -67,13 +66,15 @@ func makeHTTPServer() *http.Server {
 }
 
 func main() {
+	log.Println("bgp starting")
+	
 	dict = make(map[string]Unit)
 
 	var m *autocert.Manager
 	var server *http.Server
 
-	hostPolicy = func(ctx context.Context, host string) error {
-		allowedHost = "www.sbc.crabdance.com"
+	hostPolicy := func(ctx context.Context, host string) error {
+		allowedHost := "saturten.com"
 		if host == allowedHost {
 			return nil
 		}
@@ -81,7 +82,7 @@ func main() {
 		return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
 	}
 
-	certPath := "/etc/letsencrypt/live/sbc.crabdance.com/"
+	certPath := "/etc/letsencrypt/live/saturten.com/"
 	m = &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		HostPolicy: hostPolicy,
@@ -92,8 +93,6 @@ func main() {
 	server.Addr = ":443"
 	server.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
 
-	go func() {
-		log.Println("Starting server on %s\n", server.Addr)
-		log.Fatal(server.ListenAndServeTLS("", ""))
-	}()
+	log.Println("Starting server on ", server.Addr)
+	log.Fatal(server.ListenAndServeTLS("", ""))
 }
