@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
-	"bytes"
-	"io"
-	"io/ioutil"
-	"encoding/json"
-	"os"
+	"html"
+	"log"
 
 	"github.com/gorilla/mux"
 )
@@ -22,10 +19,6 @@ type Unit struct {
 
 // Utility
 
-func log(message string) {
-	fmt.Println(message + "\n")
-}
-
 func checkError(message string, err error) {
 	if err != nil {
 		fmt.Println("ERROR: " + message)
@@ -37,19 +30,30 @@ func checkError(message string, err error) {
 func formatRequest(r *http.Request) {
 	requestDump, err := httputil.DumpRequest(r, true)
 	checkError("couldnt format http request", err)
-	log(string(requestDump))
+	log.Println(string(requestDump))
 }
 
+// HTTP Handlers
+
 func unitHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	fmt.Fprintf(w, "Hello. unit handler here")
+	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
+}
+
+func listHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello. list handler here")
+	// TODO convert dict to json, send that as response
 }
 
 func main() {
 	dict = make(map[string]Unit)
 	
-	log("Starting server")
+	log.Println("Starting server")
 
 	router := mux.NewRouter().StrictSlash(true)
-    router.HandleFunc("/unit/{unit}", unitHandler)
+	router.HandleFunc("/unit/{beanID}", unitHandler)
+	router.HandleFunc("/units/{labID}", listHandler)
+	router.PathPrefix("/lab/{labID}").Handler(http.FileServer(http.Dir("./static")))
+
 	log.Fatal(http.ListenAndServeTLS(":443", "server.crt", "server.key", router))
 }

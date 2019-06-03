@@ -1,0 +1,69 @@
+user plugs in power and ethernet for a raspberry pi in the lab
+
+user plugs in USB key
+something loads exeutable from USB key to raspberry pi
+executabale starts on pi
+executable makes directory structure (versions folder and code)
+executabale compiles and starts nodejs edge program and python script
+executabale installs systemd stuff s.t. programs run on boot and handle crashing
+python script runs and collects version files
+nodejs edge program starts loop of looking for new beans every n seconds
+
+    when nep finds a new bean
+        subscribes to the /unit/beanID/ topic (e.g. /unit/22447799/)
+        publishes on the same topic a hello message
+    
+    when an update message is published on any bean topic (e.g. /unit/+/)
+        if updating
+            add the task to the queue
+        else
+            start ryans code with selected bean id and version file
+
+    when an update finishes
+        publish done on /unit/beanID topic
+
+        if queue is not empty
+            dequeue a unit and start the update
+
+
+user collects bean ids for all beans
+user connects the units and the pi with the beans
+user goes to website
+user enters lab name in search bar, is taken to lab page
+user finds the beanIDs of the beans he connected
+user names units with given beanIDs
+user selects version to update to for units
+
+1st Page: search bar, search button
+    on search button press:
+        go to /lab/{x} where x is value from search bar
+    TODO: autocomplete?
+
+2nd Page: /lab/{labID}
+    on load:
+        call /units/{labID} to get list of units for this labID
+        build table with list where each row has:
+            name [textbox], bean id [text], version [dropdown], state [icon] where a state is one of (updating, success, failure)
+
+    on dropdown change:
+        send UPDATE request to /unit/{beanID}{version}
+
+    on textbox save button press:
+        send POST to /unit/{beanID}{name}
+
+Backend go program BGP:
+
+subscribe to /unit/+/
+
+    on publish /unit/beanID/:
+        create unit object
+        put it in the dict
+
+https endpoints:
+    /units/{labID}
+    GET:
+        return list of all units with given labID. starting just return all units
+
+    /unit/{beanID}
+    UPDATE:
+        update unit with beanID to specified version
