@@ -9,6 +9,7 @@ import (
 	"crypto/tls"
 	"time"
 
+	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -52,7 +53,8 @@ func makeHTTPServer() *http.Server {
 
 	router := &http.ServeMux{}
 	//mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/unit/{beanID}", unitHandler)
+	//{beanID}
+	router.HandleFunc("/unit", unitHandler)
 	router.HandleFunc("/units/{labID}", listHandler)
 	router.Handle("/lab/{labID}", http.StripPrefix("/lab/{labID}/", http.FileServer(http.Dir("./static"))))
 	//router.PathPrefix("/lab/{labID}").Handler(http.FileServer(http.Dir("./static")))
@@ -92,6 +94,7 @@ func main() {
 	server = makeHTTPServer()
 	server.Addr = ":443"
 	server.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
+	server.TLSConfig.NextProtos = append(server.TLSConfig.NextProtos, acme.ALPNProto)
 
 	log.Println("Starting server on ", server.Addr)
 	log.Fatal(server.ListenAndServeTLS("", ""))
