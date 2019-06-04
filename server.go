@@ -53,8 +53,8 @@ func fakeData() {
 
 // default message handler
 var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
-	log.Println("TOPIC: %s\n", msg.Topic())
-	log.Println("MSG: %s\n", msg.Payload())
+	log.Println("TOPIC: ", msg.Topic())
+	log.Println("MSG: ", string(msg.Payload()))
 }
 
 func setupMQTT(tlsConfig *tls.Config) {
