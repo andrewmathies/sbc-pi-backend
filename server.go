@@ -50,14 +50,17 @@ func fakeData() {
 // HTTP Handlers
 
 func getUnits(w http.ResponseWriter, r *http.Request) {
-	w.Header.Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(dict)
 }
 
 func getUnit(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "return unit with id")
-	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	unit := dict[params["id"]]
+	json.NewEncoder(w).Encode(unit)
 }
+
 func createUnit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "create a unit")
 	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
