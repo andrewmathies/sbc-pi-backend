@@ -73,9 +73,12 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "update a unit")
 	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
 }
+
 func deleteUnit(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "delete a unit")
-	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	delete(dict, params["id"])
+	json.NewEncoder(w).Encode(dict)
 }
 
 func makeHTTPServer() *http.Server {
