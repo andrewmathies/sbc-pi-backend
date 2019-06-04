@@ -14,6 +14,7 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 	"github.com/gorilla/mux"
 	"github.com/segmentio/ksuid"
+	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
 var dict map[string]Unit
@@ -47,14 +48,46 @@ func fakeData() {
 	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322"}
 }
 
+// MQTT stuff
+
+// default message handler
+var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
+	log.Println("TOPIC: %s\n", msg.Topic())
+	log.Println("MSG: %s\n", msg.Payload())
+}
+
+func setupMQTT() {
+	// opts contains broker address and other config info
+	opts := MQTT.NewClientOptions().AddBroker("tls://saturten.com:8883")
+  	opts.SetClientID("go-simple")
+	opts.SetDefaultPublishHandler(f)
+	
+	// initiate connection with broker
+	c := MQTT.NewClient(opts)
+  	if token := c.Connect(); token.Wait() && token.Error() != nil {
+    	panic(token.Error())
+	}
+	log.Println("Connected to MQTT broker")
+	
+	// subscribe to wildcard topic
+	if token := c.Subscribe("/unit/+/", 0, nil); token.Wait() && token.Error() != nil {
+		fmt.Println(token.Error())
+		os.Exit(1)
+	}
+	log.Println("Subscribed to /unit/+/")
+}
+
+
 // HTTP Handlers
 
 func getUnits(w http.ResponseWriter, r *http.Request) {
+	log.Println("GET - getUnits hit")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(dict)
 }
 
 func getUnit(w http.ResponseWriter, r *http.Request) {
+	log.Println("GET - getUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	unit := dict[params["id"]]
@@ -62,6 +95,7 @@ func getUnit(w http.ResponseWriter, r *http.Request) {
 }
 
 func createUnit(w http.ResponseWriter, r *http.Request) {
+	log.Println("POST - createUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	var unit Unit
 	_ = json.NewDecoder(r.Body).Decode(&unit)
@@ -71,6 +105,7 @@ func createUnit(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateUnit(w http.ResponseWriter, r *http.Request) {
+	log.Println("PUT - updateUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	delete(dict, params["id"])
@@ -81,6 +116,7 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteUnit(w http.ResponseWriter, r *http.Request) {
+	log.Println("DELETE - deleteUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	delete(dict, params["id"])
@@ -96,7 +132,6 @@ func makeHTTPServer() *http.Server {
 	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
 
 	router.Handle("/lab/", http.StripPrefix("/lab/", http.FileServer(http.Dir("./static"))))
-	//router.PathPrefix("/lab/{labID}").Handler(http.FileServer(http.Dir("./static")))
 
 	return &http.Server{
         ReadTimeout:  5 * time.Second,
@@ -109,9 +144,14 @@ func makeHTTPServer() *http.Server {
 func main() {
 	log.Println("Starting Backend")
 	
+	// data TODO: implement db
 	dict = make(map[string]Unit)
 	fakeData()
 
+	// mqtt client
+	go setupMQTT()
+
+	// this section makes sure we have a valid cert
 	var m *autocert.Manager
 	var server *http.Server
 
@@ -131,6 +171,7 @@ func main() {
 		Cache:      autocert.DirCache(certPath),
 	}
 
+	// build and run the https server
 	server = makeHTTPServer()
 	server.Addr = ":443"
 	server.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
