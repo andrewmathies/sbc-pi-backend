@@ -41,24 +41,24 @@ func formatRequest(r *http.Request) {
 // HTTP Handlers
 
 func getUnits(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "will return all units")
+	fmt.Fprintf(w, "return all units")
 	// TODO serialize units dict, return that
 }
 
 func getUnit(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello. unit handler here")
+	fmt.Fprintf(w, "return unit with id")
 	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
 }
 func createUnit(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello. unit handler here")
+	fmt.Fprintf(w, "create a unit")
 	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
 }
 func updateUnit(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello. unit handler here")
+	fmt.Fprintf(w, "update a unit")
 	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
 }
 func deleteUnit(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello. unit handler here")
+	fmt.Fprintf(w, "delete a unit")
 	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
 }
 
@@ -66,7 +66,7 @@ func makeHTTPServer() *http.Server {
 	log.Println("building server")
 
 	//router := &http.ServeMux{}
-	router = mux.NewRouter()
+	router := mux.NewRouter()
 	router.HandleFunc("/api/units/", getUnits).Methods("GET")
 	router.HandleFunc("/api/units/{id}", getUnit).Methods("GET")
 	router.HandleFunc("/api/units", createUnit).Methods("POST")
