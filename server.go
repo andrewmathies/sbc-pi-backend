@@ -97,6 +97,7 @@ func handleMsg(beanID string, msg Msg) {
 }
 
 func publishMsg(beanID string, msg Msg) {
+	log.Println("Publishing StartUpdate version on ", beanID)
 	json, encodeErr := json.Marshal(msg)
 	
 	if encodeErr != nil {
@@ -187,7 +188,7 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	var temp Unit
 	_ = json.NewDecoder(r.Body).Decode(&temp)
 
-	if (temp.Version != "") {
+	if (temp.Version != "" && unit.Version != temp.Version) {
 		unit.Version = temp.Version
 		unit.State = Updating
 
