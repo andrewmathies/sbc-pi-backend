@@ -221,7 +221,7 @@ func makeHTTPServer() *http.Server {
 	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
 	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
 
-	router.Handle("/", http.FileServer(http.Dir("./lab")))
+	router.Handle("/", http.FileServer(http.Dir("./views")))
 
 	return &http.Server{
         ReadTimeout:  5 * time.Second,
