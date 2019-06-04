@@ -11,6 +11,8 @@ import (
 
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
+
+	"github.com/gorilla/mux"
 )
 
 var dict map[string]Unit
@@ -38,25 +40,40 @@ func formatRequest(r *http.Request) {
 
 // HTTP Handlers
 
-func unitHandler(w http.ResponseWriter, r *http.Request) {
+func getUnits(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "will return all units")
+	// TODO serialize units dict, return that
+}
+
+func getUnit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello. unit handler here")
 	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
 }
-
-func listHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello. list handler here")
-	// TODO convert dict to json, send that as response
+func createUnit(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello. unit handler here")
+	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
+}
+func updateUnit(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello. unit handler here")
+	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
+}
+func deleteUnit(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello. unit handler here")
+	// TODO get id, version, and beanID from request, then publish update msg on mqtt channel with that data
 }
 
 func makeHTTPServer() *http.Server {
 	log.Println("building server")
 
-	router := &http.ServeMux{}
-	//mux.NewRouter().StrictSlash(true)
-	//{beanID}
-	router.HandleFunc("/unit", unitHandler)
-	router.HandleFunc("/units/{labID}", listHandler)
-	router.Handle("/lab/{labID}", http.StripPrefix("/lab/{labID}/", http.FileServer(http.Dir("./static"))))
+	//router := &http.ServeMux{}
+	router = mux.NewRouter()
+	router.HandleFunc("/api/units/", getUnits).Methods("GET")
+	router.HandleFunc("/api/units/{id}", getUnit).Methods("GET")
+	router.HandleFunc("/api/units", createUnit).Methods("POST")
+	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
+	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
+
+	//router.Handle("/lab/{labID}", http.StripPrefix("/lab/{labID}/", http.FileServer(http.Dir("./static"))))
 	//router.PathPrefix("/lab/{labID}").Handler(http.FileServer(http.Dir("./static")))
 
 	return &http.Server{
@@ -68,7 +85,7 @@ func makeHTTPServer() *http.Server {
 }
 
 func main() {
-	log.Println("bgp starting")
+	log.Println("Starting Backend")
 	
 	dict = make(map[string]Unit)
 
