@@ -86,6 +86,7 @@ func makeHTTPServer() *http.Server {
 
 func main() {
 	log.Println("Starting Backend")
+	// need change for test
 	
 	dict = make(map[string]Unit)
 
