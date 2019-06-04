@@ -72,7 +72,7 @@ var client MQTT.Client
 var qos int
 
 func handleMsg(beanID string, msg Msg) {
-	log.Println("BeanID: ", beanID, "\nMsg: ", msg)
+	log.Println("Handling MQTT Message\nBeanID: ", beanID, "\nMsg: ", msg)
 
 	switch msg.Header {
 	case "Hello":
@@ -86,11 +86,13 @@ func handleMsg(beanID string, msg Msg) {
 		id := msg.ID
 		unit := dict[id]
 		unit.State = Idle
+		dict[id] = unit
 	case "Fail":
 		// update status of unit and push that to frontend???
 		id := msg.ID
 		unit := dict[id]
 		unit.State = Failed
+		dict[id] = unit
 	default:
 		log.Println("ERROR: unexpected MQTT message ", msg.Header)
 	}
@@ -219,7 +221,7 @@ func makeHTTPServer() *http.Server {
 	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
 	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
 
-	router.Handle("/lab/", http.StripPrefix("/lab/", http.FileServer(http.Dir("./static"))))
+	router.Handle("/", http.FileServer(http.Dir("./lab")))
 
 	return &http.Server{
         ReadTimeout:  5 * time.Second,
