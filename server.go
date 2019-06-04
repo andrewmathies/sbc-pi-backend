@@ -189,8 +189,7 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&temp)
 
 	if (temp.Version != "" && oldUnit.Version != temp.Version) {
-		dict[params["id"]].Version = temp.Version
-		dict[params["id"]].State = Updating
+		temp.State = Updating
 
 		var msg Msg
 		msg.ID = params["id"]
@@ -199,11 +198,9 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 		go publishMsg(oldUnit.BeanID, msg)
 	}
 
-	if (temp.Name != "") {
-		dict[params["id"]].Name = temp.Name
-	}
+	dict[params["id"]] = temp
 	
-	json.NewEncoder(w).Encode(unit)
+	json.NewEncoder(w).Encode(temp)
 }
 
 func deleteUnit(w http.ResponseWriter, r *http.Request) {
