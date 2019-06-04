@@ -21,8 +21,15 @@ import (
 var dict map[string]Unit
 
 type Unit struct {
-	Version string `json:"version"`
-	BeanID 	string `json:"beanID"`
+	Version string 	`json:"version"`
+	BeanID 	string 	`json:"beanID"`
+	Name	string	`json:"name"`
+}
+
+// header is one of: Hello, StartUpdate, Complete, Fail
+var Msg struct {
+	Header	string	`json:"header"`
+	Version	string	`json:"version"`
 }
 
 // Utility
@@ -41,20 +48,40 @@ func formatRequest(r *http.Request) {
 	log.Println(string(requestDump))
 }
 
-
 func fakeData() {
-	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434"}
-	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999"}
-	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432"}
-	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322"}
+	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960"}
+	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo"}
+	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000"}
+	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here"}
 }
 
 // MQTT stuff
 
+func handleMsg(beanID string, msg Msg) {
+	
+}
+
 // default message handler
-var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
-	log.Println("TOPIC: ", msg.Topic())
-	log.Println("MSG: ", string(msg.Payload()))
+var f MQTT.MessageHandler = func(client MQTT.Client, mqttMsg MQTT.Message) {
+	var msg Msg
+	unpackErr := json.Unmarshal(mqttMsg.Payload(), &msg)
+	if unpackErr != nil {
+		log.Println("ERROR: couldn't unpack MQTT message ", unpackErr)
+		return
+	}
+
+	topic := mqttMsg.Topic()
+	topicParts := strings.Split(topic, "/")
+	if len(topicParts) != 3 {
+		log.Println("ERROR: badly formed MQTT topic ", topicParts)
+		return
+	}
+
+	log.Println("TOPIC: ", topic)
+	log.Println("MSG: ", msg)
+
+	beanID := topicParts[2]
+	handleMsg(beanID, msg)
 }
 
 func setupMQTT(tlsConfig *tls.Config) {
