@@ -74,6 +74,7 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	delete(dict, params["id"])
+	var unit Unit
 	_ = json.NewDecoder(r.Body).Decode(&unit)
 	dict[params["id"]] = unit
 	json.NewEncoder(w).Encode(unit)
