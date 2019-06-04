@@ -57,11 +57,14 @@ var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 	log.Println("MSG: %s\n", msg.Payload())
 }
 
-func setupMQTT() {
+func setupMQTT(tlsConfig *tls.Config) {
 	// opts contains broker address and other config info
 	opts := MQTT.NewClientOptions().AddBroker("tls://saturten.com:8883")
   	opts.SetClientID("go-simple")
 	opts.SetDefaultPublishHandler(f)
+	opts.SetTLSConfig(tlsConfig)
+	opts.SetUsername("andrew")
+	opts.SetPassword("1plus2is3")
 	
 	// initiate connection with broker
 	c := MQTT.NewClient(opts)
@@ -149,9 +152,6 @@ func main() {
 	dict = make(map[string]Unit)
 	fakeData()
 
-	// mqtt client
-	go setupMQTT()
-
 	// this section makes sure we have a valid cert
 	var m *autocert.Manager
 	var server *http.Server
@@ -172,10 +172,15 @@ func main() {
 		Cache:      autocert.DirCache(certPath),
 	}
 
+	tlsConfig := &tls.Config{GetCertificate: m.GetCertificate}
+
+	// mqtt client
+	go setupMQTT(tlsConfig)
+
 	// build and run the https server
 	server = makeHTTPServer()
 	server.Addr = ":443"
-	server.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
+	server.TLSConfig = tlsConfig
 	server.TLSConfig.NextProtos = append(server.TLSConfig.NextProtos, acme.ALPNProto)
 
 	log.Println("Starting server on ", server.Addr)
