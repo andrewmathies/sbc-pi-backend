@@ -60,33 +60,33 @@ func formatRequest(r *http.Request) {
 }
 
 func fakeData() {
-	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960", State: "0"}
-	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo", State: "1"}
-	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000", State: "2"}
-	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here", State: "1"}
+	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960", State: 0}
+	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo", State: 1}
+	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000", State: 2}
+	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here", State: 1}
 }
 
 // MQTT stuff
 
 var client MQTT.Client
-var qos
+var qos int
 
 func handleMsg(beanID string, msg Msg) {
 	log.Println("BeanID: ", beanID, "\nMsg: ", msg)
 
 	switch msg.Header {
-	case: "Hello":
+	case "Hello":
 		// create new unit and stuff it in the dict
-		unit := {Version: msg.Version, BeanID: beanID, Name: "", State: Idle}
+		unit := Unit{Version: msg.Version, BeanID: beanID, Name: "", State: Idle}
 		dict[ksuid.New().String()] = unit
-	case: "StartUpdate":
+	case "StartUpdate":
 		// backend should publish this, not recieve it
-	case: "Complete":
+	case "Complete":
 		// update status of unit and push that to frontend???
 		id := msg.ID
 		unit := dict[id]
 		unit.State = Idle
-	case: "Fail":
+	case "Fail":
 		// update status of unit and push that to frontend???
 		id := msg.ID
 		unit := dict[id]
@@ -182,7 +182,7 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	log.Println("PUT - updateUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	unit := unit[params["id"]]
+	unit := dict[params["id"]]
 
 	var temp Unit
 	_ = json.NewDecoder(r.Body).Decode(&temp)
