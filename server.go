@@ -8,11 +8,12 @@ import (
 	"context"
 	"crypto/tls"
 	"time"
+	"encoding/json"
 
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
-
 	"github.com/gorilla/mux"
+	"github.com/segmentio/ksuid"
 )
 
 var dict map[string]Unit
@@ -38,11 +39,19 @@ func formatRequest(r *http.Request) {
 	log.Println(string(requestDump))
 }
 
+
+func fakeData() {
+	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434"}
+	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999"}
+	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432"}
+	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322"}
+}
+
 // HTTP Handlers
 
 func getUnits(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "return all units")
-	// TODO serialize units dict, return that
+	w.Header.Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(dict)
 }
 
 func getUnit(w http.ResponseWriter, r *http.Request) {
@@ -85,6 +94,7 @@ func main() {
 	log.Println("Starting Backend")
 	
 	dict = make(map[string]Unit)
+	fakeData()
 
 	var m *autocert.Manager
 	var server *http.Server
