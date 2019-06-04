@@ -21,14 +21,24 @@ import (
 
 var dict map[string]Unit
 
+type State int
+
+const (
+	Idle		State = 0
+	Updating	State = 1
+	Failed		State = 2
+)
+
 type Unit struct {
 	Version string 	`json:"version"`
 	BeanID 	string 	`json:"beanID"`
 	Name	string	`json:"name"`
+	State	State	`json:"state"`
 }
 
 // header is one of: Hello, StartUpdate, Complete, Fail
 type Msg struct {
+	ID		string	`json:"id"`
 	Header	string	`json:"header"`
 	Version	string	`json:"version"`
 }
@@ -50,16 +60,52 @@ func formatRequest(r *http.Request) {
 }
 
 func fakeData() {
-	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960"}
-	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo"}
-	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000"}
-	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here"}
+	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960", State: "0"}
+	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo", State: "1"}
+	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000", State: "2"}
+	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here", State: "1"}
 }
 
 // MQTT stuff
 
-func handleMsg(beanID string, msg Msg) {
+var client MQTT.Client
+var qos
 
+func handleMsg(beanID string, msg Msg) {
+	log.Println("BeanID: ", beanID, "\nMsg: ", msg)
+
+	switch msg.Header {
+	case: "Hello":
+		// create new unit and stuff it in the dict
+		unit := {Version: msg.Version, BeanID: beanID, Name: "", State: Idle}
+		dict[ksuid.New().String()] = unit
+	case: "StartUpdate":
+		// backend should publish this, not recieve it
+	case: "Complete":
+		// update status of unit and push that to frontend???
+		id := msg.ID
+		unit := dict[id]
+		unit.State = Idle
+	case: "Fail":
+		// update status of unit and push that to frontend???
+		id := msg.ID
+		unit := dict[id]
+		unit.State = Failed
+	default:
+		log.Println("ERROR: unexpected MQTT message ", msg.Header)
+	}
+}
+
+func publishMsg(beanID string, msg Msg) {
+	json, encodeErr := json.Marshal(msg)
+	
+	if encodeErr != nil {
+		log.Println("ERROR: couldn't marshal msg for mqtt message ", encodeErr)
+		return
+	}
+
+    token := client.Publish("/unit/" + beanID + "/", byte(qos), false, string(json))
+    token.Wait()
 }
 
 // default message handler
@@ -73,13 +119,10 @@ var f MQTT.MessageHandler = func(client MQTT.Client, mqttMsg MQTT.Message) {
 
 	topic := mqttMsg.Topic()
 	topicParts := strings.Split(topic, "/")
-	if len(topicParts) != 3 {
+	if len(topicParts) != 4 {
 		log.Println("ERROR: badly formed MQTT topic ", topicParts)
 		return
 	}
-
-	log.Println("TOPIC: ", topic)
-	log.Println("MSG: ", msg)
 
 	beanID := topicParts[2]
 	handleMsg(beanID, msg)
@@ -95,20 +138,19 @@ func setupMQTT(tlsConfig *tls.Config) {
 	opts.SetPassword("1plus2is3")
 	
 	// initiate connection with broker
-	c := MQTT.NewClient(opts)
-  	if token := c.Connect(); token.Wait() && token.Error() != nil {
+	client = MQTT.NewClient(opts)
+  	if token := client.Connect(); token.Wait() && token.Error() != nil {
     	panic(token.Error())
 	}
 	log.Println("Connected to MQTT broker")
 	
 	// subscribe to wildcard topic
-	if token := c.Subscribe("/unit/+/", 0, nil); token.Wait() && token.Error() != nil {
+	if token := client.Subscribe("/unit/+/", byte(qos), nil); token.Wait() && token.Error() != nil {
 		fmt.Println(token.Error())
 		os.Exit(1)
 	}
 	log.Println("Subscribed to /unit/+/")
 }
-
 
 // HTTP Handlers
 
@@ -140,10 +182,26 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	log.Println("PUT - updateUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	delete(dict, params["id"])
-	var unit Unit
-	_ = json.NewDecoder(r.Body).Decode(&unit)
-	dict[params["id"]] = unit
+	unit := unit[params["id"]]
+
+	var temp Unit
+	_ = json.NewDecoder(r.Body).Decode(&temp)
+
+	if (temp.Version != "") {
+		unit.Version = temp.Version
+		unit.State = Updating
+
+		var msg Msg
+		msg.ID = params["id"]
+		msg.Header = "StartUpdate"
+		msg.Version = temp.Version
+		go publishMsg(unit.BeanID, msg)
+	}
+
+	if (temp.Name != "") {
+		unit.Name = temp.Name
+	}
+	
 	json.NewEncoder(w).Encode(unit)
 }
 
@@ -203,6 +261,7 @@ func main() {
 	tlsConfig := &tls.Config{GetCertificate: m.GetCertificate}
 
 	// mqtt client
+	qos = 1
 	go setupMQTT(tlsConfig)
 
 	// build and run the https server
