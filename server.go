@@ -97,7 +97,7 @@ func handleMsg(beanID string, msg Msg) {
 }
 
 func publishMsg(beanID string, msg Msg) {
-	log.Println("Publishing StartUpdate version on ", beanID)
+	log.Println("Publishing StartUpdate version on /unit/", beanID, "/")
 	json, encodeErr := json.Marshal(msg)
 	
 	if encodeErr != nil {
@@ -183,24 +183,24 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	log.Println("PUT - updateUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	unit := dict[params["id"]]
+	oldUnit := dict[params["id"]]
 
 	var temp Unit
 	_ = json.NewDecoder(r.Body).Decode(&temp)
 
-	if (temp.Version != "" && unit.Version != temp.Version) {
-		unit.Version = temp.Version
-		unit.State = Updating
+	if (temp.Version != "" && oldUnit.Version != temp.Version) {
+		dict[params["id"]].Version = temp.Version
+		dict[params["id"]].State = Updating
 
 		var msg Msg
 		msg.ID = params["id"]
 		msg.Header = "StartUpdate"
 		msg.Version = temp.Version
-		go publishMsg(unit.BeanID, msg)
+		go publishMsg(oldUnit.BeanID, msg)
 	}
 
 	if (temp.Name != "") {
-		unit.Name = temp.Name
+		dict[params["id"]].Name = temp.Name
 	}
 	
 	json.NewEncoder(w).Encode(unit)
