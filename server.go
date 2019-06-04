@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"crypto/tls"
+	"encoding/json"
+	"fmt"
 	"log"
 	"context"
-	"crypto/tls"
 	"time"
-	"encoding/json"
 	"os"
+	"strings"
 
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
@@ -27,7 +28,7 @@ type Unit struct {
 }
 
 // header is one of: Hello, StartUpdate, Complete, Fail
-var Msg struct {
+type Msg struct {
 	Header	string	`json:"header"`
 	Version	string	`json:"version"`
 }
@@ -58,7 +59,7 @@ func fakeData() {
 // MQTT stuff
 
 func handleMsg(beanID string, msg Msg) {
-	
+
 }
 
 // default message handler
