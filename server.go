@@ -63,9 +63,6 @@ func deleteUnit(w http.ResponseWriter, r *http.Request) {
 }
 
 func makeHTTPServer() *http.Server {
-	log.Println("building server")
-
-	//router := &http.ServeMux{}
 	router := mux.NewRouter()
 	router.HandleFunc("/api/units/", getUnits).Methods("GET")
 	router.HandleFunc("/api/units/{id}", getUnit).Methods("GET")
@@ -73,7 +70,7 @@ func makeHTTPServer() *http.Server {
 	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
 	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
 
-	//router.Handle("/lab/{labID}", http.StripPrefix("/lab/{labID}/", http.FileServer(http.Dir("./static"))))
+	router.Handle("/lab/", http.StripPrefix("/lab/", http.FileServer(http.Dir("./static"))))
 	//router.PathPrefix("/lab/{labID}").Handler(http.FileServer(http.Dir("./static")))
 
 	return &http.Server{
@@ -86,7 +83,6 @@ func makeHTTPServer() *http.Server {
 
 func main() {
 	log.Println("Starting Backend")
-	// need change for test
 	
 	dict = make(map[string]Unit)
 
