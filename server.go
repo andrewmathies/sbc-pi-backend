@@ -213,34 +213,6 @@ func deleteUnit(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(dict)
 }
 
-// hopefully makes the frontend work
-/*
-// FileSystem custom file system handler
-type FileSystem struct {
-	fs http.FileSystem
-}
-
-// Open opens file
-func (fs FileSystem) Open(path string) (http.File, error) {
-	log.Println("opening " + path)
-
-	f, err := fs.fs.Open(path)
-	if err != nil {
-		return nil, err
-	}
-
-	s, err := f.Stat()
-	if s.IsDir() {
-		log.Println("we got here, probably need to change hardcoded index.html string")
-		index := strings.TrimSuffix(path, "/") + "/index.html"
-		if _, err := fs.fs.Open(index); err != nil {
-			return nil, err
-		}
-	}
-
-	return f, nil
-}
-*/
 func makeHTTPServer() *http.Server {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/units/", getUnits).Methods("GET")
@@ -249,11 +221,7 @@ func makeHTTPServer() *http.Server {
 	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
 	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
 
-	//router.Handle("/", http.FileServer(http.Dir("views")))
-	//router.Handle("/lab", http.FileServer(http.Dir("views/lab")))
-	//fileServer := http.FileServer(FileSystem{http.Dir("lab")})
-	//router.Handle("/statics/", http.StripPrefix(strings.TrimRight("/statics/", "/"), fileServer))
-	router.Handle("/", http.FileServer(http.Dir("lab")))
+	router.PathPrefix("/lab/").Handler(http.StripPrefix("/lab/"), http.FileServer(http.Dir("lab/")))
 
 	return &http.Server{
         ReadTimeout:  5 * time.Second,
