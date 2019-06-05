@@ -222,6 +222,8 @@ type FileSystem struct {
 
 // Open opens file
 func (fs FileSystem) Open(path string) (http.File, error) {
+	log.Println("opening " + path)
+
 	f, err := fs.fs.Open(path)
 	if err != nil {
 		return nil, err
@@ -229,6 +231,7 @@ func (fs FileSystem) Open(path string) (http.File, error) {
 
 	s, err := f.Stat()
 	if s.IsDir() {
+		log.Println("we got here, probably need to change hardcoded index.html string")
 		index := strings.TrimSuffix(path, "/") + "/index.html"
 		if _, err := fs.fs.Open(index); err != nil {
 			return nil, err
