@@ -214,7 +214,7 @@ func deleteUnit(w http.ResponseWriter, r *http.Request) {
 }
 
 // hopefully makes the frontend work
-
+/*
 // FileSystem custom file system handler
 type FileSystem struct {
 	fs http.FileSystem
@@ -240,7 +240,7 @@ func (fs FileSystem) Open(path string) (http.File, error) {
 
 	return f, nil
 }
-
+*/
 func makeHTTPServer() *http.Server {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/units/", getUnits).Methods("GET")
@@ -251,9 +251,9 @@ func makeHTTPServer() *http.Server {
 
 	//router.Handle("/", http.FileServer(http.Dir("views")))
 	//router.Handle("/lab", http.FileServer(http.Dir("views/lab")))
-	fileServer := http.FileServer(FileSystem{http.Dir("lab")})
-	router.Handle("/statics/", http.StripPrefix(strings.TrimRight("/statics/", "/"), fileServer))
-	//router.Handle("/", http.FileServer(http.Dir("lab")))
+	//fileServer := http.FileServer(FileSystem{http.Dir("lab")})
+	//router.Handle("/statics/", http.StripPrefix(strings.TrimRight("/statics/", "/"), fileServer))
+	router.Handle("/", http.FileServer(http.Dir("lab")))
 
 	return &http.Server{
         ReadTimeout:  5 * time.Second,
