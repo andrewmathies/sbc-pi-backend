@@ -1,3 +1,5 @@
+import {Spinner} from 'spin.js';
+
 dict = []
 versionOptions = ['2.15', '2.16', '2.17', '2.18', '2.19', '2.20', '2.21', '2.22', '2.23', '2.24', '2.25', '2.27']
 
@@ -58,10 +60,14 @@ function makeIcon(state) {
     switch (state) {
         case 0:
             //idle
-            return $('<span class="ui-icon ui-icon-check">')
+            let check = $('<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"> \
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/> \
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/> </svg>')
+            return check
         case 1:
             // updating
-            return $('<span class="ui-icon ui-icon-refresh">')
+            let spinner = new Spinner().spin()
+            return spinner.el
         case 2:
             // failed
             return $('<span class="ui-icon ui-icon-closethick">')
