@@ -15,6 +15,18 @@ $(document).ready(function() {
     })
 })
 
+// dropdown listener
+$('.dropdown').change(() => {
+    let key = event.target.id
+    let val = ''
+
+    $('select option:selected').each(function() {
+        val += $(this).text() + ' ';
+    });
+
+    console.log('key: ' + key + ', val: ' + val)
+})
+
 function buildTable() {
     // remove old table if there is one
     $('#dictTable tbody tr').remove()
@@ -29,7 +41,6 @@ function buildTable() {
         let beanElement = $('<td>').appendTo(row)
         let versionElement = $('<td>').appendTo(row)
         let stateElement = $('<td>').appendTo(row)
-        let dropdown = $('<select />').appendTo(versionElement)
 
         nameElement.append(
             $('<input>', {
@@ -37,6 +48,9 @@ function buildTable() {
                 val: curUnit.name
             })
         )
+
+        let dropdown = $('<select id="' + key + '" class="dropdown"/>').appendTo(versionElement)
+        dropdown.value = curUnit.version
 
         versionOptions.forEach(val => {
             $('<option />', {value: val, text: val}).appendTo(dropdown)
@@ -51,13 +65,13 @@ function makeIcon(state) {
     switch (state) {
         case 0:
             //idle
-            return $('<i class="fas fa-check-circle">')
+            return $('<i class="fas fa-check-circle" style="color: #34C53C">')
         case 1:
             // updating
-            return $('<i class="fas fa-spinner">')
+            return $('<i class="fas fa-spinner fa-pulse" style="color: #61D7FF">')
         case 2:
             // failed
-            return $('<i class="fas fa-times-circle">')
+            return $('<i class="fas fa-times-circle" style="color: #FF0104">')
         default:
             console.log('unexpected state in units response: ' + state)
             return
