@@ -6,7 +6,7 @@ $(document).ready(function() {
 
     $.ajax({
         type: 'GET',
-        url: 'api/units/',
+        url: '/api/units/',
         dataType: 'json',
         success: (data) => { 
             dict = data
@@ -20,22 +20,23 @@ function buildTable() {
     $('#dictTable tbody tr').remove()
 
     let table = $('#dictTable tbody')
-
-    let options = ''
+/*
+    let options
     for (let i = 0; i < versionOptions.length; i++) {
         if (versionOptions[i]) {
             options += $('<option value="' + i + '">').html(versionOptions[i])
         }
     }
-
+*/
     for (let key in dict) {
         let curUnit = dict[key]
 
         let row = $('<tr>').appendTo(table)
         let nameElement = $('<td>').appendTo(row)
-        let beanElement = $('<td>').appendTo(row)
         let versionElement = $('<td>').appendTo(row)
+        let beanElement = $('<td>').appendTo(row)
         let stateElement = $('<td>').appendTo(row)
+        let dropdown = $('<select />')
 
         nameElement.append(
             $('<input>', {
@@ -43,8 +44,13 @@ function buildTable() {
                 val: curUnit.name
             })
         )
+
+        for(let val in versionOptions) {
+            $('<option />', {value: val, text: val}).appendTo(dropdown)
+        }
+        
+        versionElement.append(dropdown)
         beanElement.append($('<div>').html(curUnit.beanID))
-        versionElement.append($('<select id="' + key + '" class="cs">').append(options))
         stateElement.append(makeIcon(curUnit.state))
     }
 }
@@ -53,13 +59,13 @@ function makeIcon(state) {
     switch (state) {
         case 0:
             //idle
-            return $('<span class="ui-icon-check">')
+            return $('<span class="ui-icon ui-icon-check">')
         case 1:
             // updating
-            return $('<span class="ui-icon-refresh">')
+            return $('<span class="ui-icon ui-icon-refresh">')
         case 2:
             // failed
-            return $('<span class="ui-icon-closethick">')
+            return $('<span class="ui-icon ui-icon-closethick">')
         default:
             console.log('unexpected state in units response: ' + state)
             return
