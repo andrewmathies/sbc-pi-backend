@@ -80,7 +80,7 @@ func handleMsg(beanID string, msg Msg) {
 		unit := Unit{Version: msg.Version, BeanID: beanID, Name: "", State: Idle}
 		dict[ksuid.New().String()] = unit
 	case "StartUpdate":
-		// backend should publish this, not recieve it
+		// the backend published this, so do nothing
 	case "Complete":
 		// update status of unit and push that to frontend???
 		id := msg.ID

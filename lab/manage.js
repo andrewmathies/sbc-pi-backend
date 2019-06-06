@@ -15,6 +15,10 @@ $(document).ready(function() {
     })
 })
 
+$('.nameBox').on('input propertychange paste', () => {
+    console.log(this.id + ' textbox changed')
+});
+
 function dropdownListener(element) {
     let key = element.id
     let val = element.value
@@ -58,6 +62,8 @@ function buildTable() {
         nameElement.append(
             $('<input>', {
                 type: 'text',
+                id: key,
+                class: 'nameBox',
                 val: curUnit.name
             })
         )
