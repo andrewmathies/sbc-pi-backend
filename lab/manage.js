@@ -15,17 +15,12 @@ $(document).ready(function() {
     })
 })
 
-// dropdown listener
-$('.dropdown').change(() => {
-    let key = event.target.id
-    let val = ''
-
-    $('select option:selected').each(function() {
-        val += $(this).text() + ' ';
-    });
+function dropdownListener(element) {
+    let key = element.id
+    let val = element.value
 
     console.log('key: ' + key + ', val: ' + val)
-})
+}
 
 function buildTable() {
     // remove old table if there is one
@@ -49,7 +44,7 @@ function buildTable() {
             })
         )
 
-        let dropdown = $('<select id="' + key + '" class="dropdown"/>').appendTo(versionElement)
+        let dropdown = $('<select id="' + key + '" onchange="dropdownListener(this)"/>').appendTo(versionElement)
         dropdown.value = curUnit.version
 
         versionOptions.forEach(val => {
