@@ -45,12 +45,13 @@ function buildTable() {
             })
         )
 
-        for(let val in versionOptions) {
+        beanElement.append($('<div>').html(curUnit.beanID))
+
+        versionOptions.forEach(val => {
             $('<option />', {value: val, text: val}).appendTo(dropdown)
-        }
+        })
         
         versionElement.append(dropdown)
-        beanElement.append($('<div>').html(curUnit.beanID))
         stateElement.append(makeIcon(curUnit.state))
     }
 }
