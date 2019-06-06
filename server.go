@@ -188,7 +188,14 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	oldUnit := dict[params["id"]]
 
 	var temp Unit
-	_ = json.NewDecoder(r.Body).Decode(&temp)
+	decodeErr = json.NewDecoder(r.Body).Decode(&temp)
+
+	if decodeErr != nil {
+		log.Println("PUT - failed decoding request")
+		log.Println(decodeErr)
+		json.NewEncoder(w).Encode(oldUnit)
+		return
+	}
 
 	if (temp.Version != "" && oldUnit.Version != temp.Version) {
 		temp.State = Updating

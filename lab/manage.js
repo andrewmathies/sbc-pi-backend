@@ -7,9 +7,9 @@ $(document).ready(function() {
     $.ajax({
         type: 'GET',
         url: '/api/units/',
-        dataType: 'json',
-        success: (data) => { 
-            dict = data
+        contentType: 'application/json',
+        success: (resp) => { 
+            dict = resp
             buildTable()
         }
     })
@@ -20,6 +20,24 @@ function dropdownListener(element) {
     let val = element.value
 
     console.log('key: ' + key + ', val: ' + val)
+
+    params = {
+        version: val,
+        beanID: dict[key].beanID,
+        name: dict[key].name,
+        state: dict[key].state
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: '/api/unit/' + key,
+        contentType: 'application/json',
+        data: JSON.stringify(params),
+        success: (resp) => {
+            console.log('update request successful')
+            console.log(resp)
+        }
+    })
 }
 
 function buildTable() {
