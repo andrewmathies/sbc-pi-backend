@@ -1,5 +1,3 @@
-import {Spinner} from 'spin.js';
-
 dict = []
 versionOptions = ['2.15', '2.16', '2.17', '2.18', '2.19', '2.20', '2.21', '2.22', '2.23', '2.24', '2.25', '2.27']
 
@@ -22,14 +20,7 @@ function buildTable() {
     $('#dictTable tbody tr').remove()
 
     let table = $('#dictTable tbody')
-/*
-    let options
-    for (let i = 0; i < versionOptions.length; i++) {
-        if (versionOptions[i]) {
-            options += $('<option value="' + i + '">').html(versionOptions[i])
-        }
-    }
-*/
+
     for (let key in dict) {
         let curUnit = dict[key]
 
@@ -60,17 +51,13 @@ function makeIcon(state) {
     switch (state) {
         case 0:
             //idle
-            let check = $('<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"> \
-                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/> \
-                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/> </svg>')
-            return check
+            return $('<i class="fas fa-check-circle">')
         case 1:
             // updating
-            let spinner = new Spinner().spin()
-            return spinner.el
+            return $('<i class="fas fa-spinner">')
         case 2:
             // failed
-            return $('<span class="ui-icon ui-icon-closethick">')
+            return $('<i class="fas fa-times-circle">')
         default:
             console.log('unexpected state in units response: ' + state)
             return
