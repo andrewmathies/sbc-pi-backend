@@ -33,10 +33,10 @@ function buildTable() {
 
         let row = $('<tr>').appendTo(table)
         let nameElement = $('<td>').appendTo(row)
-        let versionElement = $('<td>').appendTo(row)
         let beanElement = $('<td>').appendTo(row)
+        let versionElement = $('<td>').appendTo(row)
         let stateElement = $('<td>').appendTo(row)
-        let dropdown = $('<select />')
+        let dropdown = $('<select />').appendTo(versionElement)
 
         nameElement.append(
             $('<input>', {
@@ -45,13 +45,11 @@ function buildTable() {
             })
         )
 
-        beanElement.append($('<div>').html(curUnit.beanID))
-
         versionOptions.forEach(val => {
             $('<option />', {value: val, text: val}).appendTo(dropdown)
         })
         
-        versionElement.append(dropdown)
+        beanElement.append($('<div>').html(curUnit.beanID))
         stateElement.append(makeIcon(curUnit.state))
     }
 }
