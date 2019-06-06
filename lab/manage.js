@@ -30,7 +30,7 @@ function dropdownListener(element) {
 
     $.ajax({
         type: 'PUT',
-        url: '/api/unit/' + key,
+        url: '/api/units/' + key,
         contentType: 'application/json',
         data: JSON.stringify(params),
         success: (resp) => {
