@@ -15,21 +15,42 @@ $(document).ready(function() {
     })
 })
 
-$('.nameBox').on('input propertychange paste', () => {
-    console.log(this.id + ' textbox changed')
-});
+function boxListener(element) {
+    let key = element.id
+    let name = element.value
+
+    console.log('textbox change, key: ' + key + ', name: ' + name)
+
+    params = {
+        version: dict[key].version,
+        beanID: dict[key].beanID,
+        name: name,
+        state: dict[key].state
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: '/api/units/' + key,
+        contentType: 'application/json',
+        data: JSON.stringify(params),
+        success: (resp) => {
+            console.log('update request successful')
+            console.log(resp)
+        }
+    })
+}
 
 function dropdownListener(element) {
     let key = element.id
-    let val = element.value
+    let version = element.value
 
-    console.log('key: ' + key + ', val: ' + val)
+    console.log('select change, key: ' + key + ', version: ' + version)
 
     params = {
-        version: val,
+        version: version,
         beanID: dict[key].beanID,
         name: dict[key].name,
-        state: dict[key].state
+        state: 1 // 1 is State.Updating
     }
 
     $.ajax({
@@ -59,14 +80,7 @@ function buildTable() {
         let versionElement = $('<td>').appendTo(row)
         let stateElement = $('<td>').appendTo(row)
 
-        nameElement.append(
-            $('<input>', {
-                type: 'text',
-                id: key,
-                class: 'nameBox',
-                val: curUnit.name
-            })
-        )
+        nameElement.append($('<input type="text" id="' + key + '" onchange="boxListener(this)" value="' + curUnit.name + '">'))
 
         let dropdown = $('<select id="' + key + '" onchange="dropdownListener(this)"/>').appendTo(versionElement)
         dropdown.value = curUnit.version
