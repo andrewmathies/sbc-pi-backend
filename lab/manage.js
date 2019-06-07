@@ -104,7 +104,14 @@ function buildTable() {
         dropdown.value = curUnit.version
 
         versionOptions.forEach(val => {
-            $('<option />', {value: val, text: val}).appendTo(dropdown)
+            console.log('comparing ' + val + ' and ' + curUnit.version)
+
+            if (val === curUnit.version) {
+                console.log('found a match')
+                $('<option selected/>', {value: val, text: val}).appendTo(dropdown)
+            } else {
+                $('<option />', {value: val, text: val}).appendTo(dropdown)
+            }
         })
         
         beanElement.append($('<div>').html(curUnit.beanID))
