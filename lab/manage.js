@@ -1,5 +1,6 @@
-dict = []
-versionOptions = ['2.15', '2.16', '2.17', '2.18', '2.19', '2.20', '2.21', '2.22', '2.23', '2.24', '2.25', '2.27']
+let dict = []
+let versionOptions = ['2.15', '2.16', '2.17', '2.18', '2.19', '2.20', '2.21', '2.22', '2.23', '2.24', '2.25', '2.27']
+const interval = 30000
 
 $(document).ready(function() {
     console.log('Getting unit data')
@@ -11,9 +12,26 @@ $(document).ready(function() {
         success: (resp) => { 
             dict = resp
             buildTable()
+            poll()
         }
     })
 })
+
+function poll() {
+    console.log('polling server')
+    setTimeout(() => {
+        $.ajax({
+            type: 'GET',
+            url: '/api/units/',
+            contentType: 'application/json',
+            success: (resp) => { 
+                dict = resp
+                buildTable()
+                poll()
+            }
+        })
+    }, interval)
+}
 
 function boxListener(element) {
     let key = element.id
