@@ -34,8 +34,16 @@ function poll() {
 }
 
 function boxListener(element) {
-    let key = element.id
+    let id = element.id.split(' ')
     let name = element.value
+    let key
+
+    if (id.length == 2)
+        key = id[1]
+    else {
+        console.error('ID didnt have two parts. ' + id)
+        return
+    }
 
     console.log('textbox change, key: ' + key + ', name: ' + name)
 
@@ -59,8 +67,16 @@ function boxListener(element) {
 }
 
 function dropdownListener(element) {
-    let key = element.id
+    let id = element.id.split(' ')
     let version = element.value
+    let key
+
+    if (id.length == 2)
+        key = id[1]
+    else {
+        console.error('ID didnt have two parts. ' + id)
+        return
+    }
 
     console.log('select change, key: ' + key + ', version: ' + version)
 
@@ -83,7 +99,7 @@ function dropdownListener(element) {
     })
 
     dict[key].state = 1
-    $('i#' + key).replaceWith(makeIcon(key, 1))
+    $('#icon ' + key).replaceWith(makeIcon(key, 1))
 }
 
 function buildTable() {
@@ -101,9 +117,9 @@ function buildTable() {
         let versionElement = $('<td>').appendTo(row)
         let stateElement = $('<td>').appendTo(row)
 
-        nameElement.append($('<input type="text" id="' + key + '" onchange="boxListener(this)" value="' + curUnit.name + '">'))
+        nameElement.append($('<input type="text" id="textbox ' + key + '" onchange="boxListener(this)" value="' + curUnit.name + '">'))
 
-        let dropdown = $('<select id="' + key + '" onchange="dropdownListener(this)"/>').appendTo(versionElement)
+        let dropdown = $('<select id="select ' + key + '" onchange="dropdownListener(this)"/>').appendTo(versionElement)
         dropdown.value = curUnit.version
 
         versionOptions.forEach(val => {
@@ -119,13 +135,13 @@ function makeIcon(key, state) {
     switch (state) {
         case 0:
             //idle
-            return $('<i id="' + key + '" class="fas fa-check-circle" style="color: #34C53C">')
+            return $('<i id="icon ' + key + '" class="fas fa-check-circle" style="color: #34C53C">')
         case 1:
             // updating
-            return $('<i id="' + key + '" class="fas fa-spinner fa-pulse" style="color: #61D7FF">')
+            return $('<i id="icon ' + key + '" class="fas fa-spinner fa-pulse" style="color: #61D7FF">')
         case 2:
             // failed
-            return $('<i id="' + key + '" class="fas fa-times-circle" style="color: #FF0104">')
+            return $('<i id="icon ' + key + '" class="fas fa-times-circle" style="color: #FF0104">')
         default:
             console.log('unexpected state in units response: ' + state)
             return
