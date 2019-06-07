@@ -81,6 +81,9 @@ function dropdownListener(element) {
             console.log(resp)
         }
     })
+
+    dict[key].state = 1
+    $('i#' + key).replaceWith(makeIcon(key, 1))
 }
 
 function buildTable() {
@@ -108,21 +111,21 @@ function buildTable() {
         })
         
         beanElement.append($('<div>').html(curUnit.beanID))
-        stateElement.append(makeIcon(curUnit.state))
+        stateElement.append(makeIcon(key, curUnit.state))
     }
 }
 
-function makeIcon(state) {
+function makeIcon(key, state) {
     switch (state) {
         case 0:
             //idle
-            return $('<i class="fas fa-check-circle" style="color: #34C53C">')
+            return $('<i id="' + key + '" class="fas fa-check-circle" style="color: #34C53C">')
         case 1:
             // updating
-            return $('<i class="fas fa-spinner fa-pulse" style="color: #61D7FF">')
+            return $('<i id="' + key + '" class="fas fa-spinner fa-pulse" style="color: #61D7FF">')
         case 2:
             // failed
-            return $('<i class="fas fa-times-circle" style="color: #FF0104">')
+            return $('<i id="' + key + '" class="fas fa-times-circle" style="color: #FF0104">')
         default:
             console.log('unexpected state in units response: ' + state)
             return
