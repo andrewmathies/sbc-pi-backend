@@ -1,5 +1,5 @@
 let dict = []
-let versionOptions //['2.15', '2.16', '2.17', '2.18', '2.19', '2.20', '2.21', '2.22', '2.23', '2.24', '2.25', '2.27']
+let versionOptions
 let versionData = false, unitData = false
 
 const interval = 5000
@@ -12,7 +12,7 @@ $(document).ready(function() {
 		url: '/api/versions/',
 		contentType: 'application/json',
 		success: (resp) => {
-			versionOptions = resp
+			versionOptions = Object.values(resp)
 			buildTable()
 		},
 		failure: (resp) => {
