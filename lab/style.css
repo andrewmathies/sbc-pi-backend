@@ -1,11 +1,39 @@
-input {
-  margin-bottom: 3em;
-}
-
 td, tr {
-  padding: 2em;
+	padding: 2em;
 }
 
 table {
-  margin-top: 2em;
+	margin-top: 2em;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+body {
+	font-family: 'Roboto', sans-serif;
+	background-image: url("https://s3.amazonaws.com/noupe/2009/10/pattern-34.jpg")
+}
+
+h1 {
+	text-align: center;
+}
+
+td {
+	text-align: center;
+}
+
+thead th {
+    background-color: #DDEFEF;
+    border: solid 1px #DDEEEE;
+    color: #336B6B;
+    padding: 10px;
+    text-align: left;
+    text-shadow: 1px 1px 1px #fff;
+}
+
+tbody td {
+    background-color: #DDEFEF;
+    border: solid 1px #DDEEEE;
+    color: #333;
+    padding: 10px;
+    text-shadow: 1px 1px 1px #fff;
 }

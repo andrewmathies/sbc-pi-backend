@@ -1,9 +1,25 @@
 let dict = []
-let versionOptions = ['2.15', '2.16', '2.17', '2.18', '2.19', '2.20', '2.21', '2.22', '2.23', '2.24', '2.25', '2.27']
-const interval = 30000
+let versionOptions //['2.15', '2.16', '2.17', '2.18', '2.19', '2.20', '2.21', '2.22', '2.23', '2.24', '2.25', '2.27']
+let versionData = false, unitData = false
+
+const interval = 5000
 
 $(document).ready(function() {
-    console.log('Getting unit data')
+    console.log('Getting data')
+
+	$.ajax({
+		type: 'GET',
+		url: '/api/versions/',
+		contentType: 'application/json',
+		success: (resp) => {
+			versionOptions = resp
+			buildTable()
+		},
+		failure: (resp) => {
+			console.log('request to get versions failed')
+			console.log(resp)
+		}
+	})
 
     $.ajax({
         type: 'GET',
@@ -11,14 +27,18 @@ $(document).ready(function() {
         contentType: 'application/json',
         success: (resp) => { 
             dict = resp
-            buildTable()
+			buildTable()
             poll()
-        }
+        },
+		failure: (resp) => {
+			console.log('request to get units failed')
+			console.log(resp)
+		}
     })
 })
 
 function poll() {
-    console.log('polling server')
+    //console.log('polling server')
     setTimeout(() => {
         $.ajax({
             type: 'GET',
@@ -99,7 +119,8 @@ function dropdownListener(element) {
     })
 
     dict[key].state = 1
-    $('#icon ' + key).replaceWith(makeIcon(key, 1))
+	let iconID = '#icon ' + key
+    $(iconID).replaceWith(makeIcon(key, 1))
 }
 
 function buildTable() {

@@ -20,6 +20,7 @@ import (
 )
 
 var dict map[string]Unit
+var versions []string
 
 type State int
 
@@ -45,7 +46,7 @@ type Msg struct {
 
 // Utility
 
-func checkError(message string, err error) {
+func checkErr(message string, err error) {
 	if err != nil {
 		fmt.Println("ERROR: " + message)
 		fmt.Println(err)
@@ -55,7 +56,7 @@ func checkError(message string, err error) {
 
 func formatRequest(r *http.Request) {
 	requestDump, err := httputil.DumpRequest(r, true)
-	checkError("couldnt format http request", err)
+	checkErr("couldnt format http request", err)
 	log.Println(string(requestDump))
 }
 
@@ -113,17 +114,26 @@ func publishMsg(beanID string, msg Msg) {
 
 // default message handler
 var f MQTT.MessageHandler = func(client MQTT.Client, mqttMsg MQTT.Message) {
+	topic := mqttMsg.Topic()
+	topicParts := strings.Split(topic, "/")
+
+	log.Println("recieved msg on topic: " + topicParts[1])
+	
+	if topicParts[1] == "version" {
+		versions = append(versions, topicParts[2])
+		log.Println("adding " + topicParts[2] + " to versions list")
+		return
+	}
+
+	if len(topicParts) != 4 {
+		log.Println("ERROR: badly formed MQTT topic ", topicParts)
+		return
+	}
+	
 	var msg Msg
 	unpackErr := json.Unmarshal(mqttMsg.Payload(), &msg)
 	if unpackErr != nil {
 		log.Println("ERROR: couldn't unpack MQTT message ", unpackErr)
-		return
-	}
-
-	topic := mqttMsg.Topic()
-	topicParts := strings.Split(topic, "/")
-	if len(topicParts) != 4 {
-		log.Println("ERROR: badly formed MQTT topic ", topicParts)
 		return
 	}
 
@@ -147,12 +157,19 @@ func setupMQTT(tlsConfig *tls.Config) {
 	}
 	log.Println("Connected to MQTT broker")
 	
-	// subscribe to wildcard topic
+	// subscribe to unit wildcard topic
 	if token := client.Subscribe("/unit/+/", byte(qos), nil); token.Wait() && token.Error() != nil {
-		fmt.Println(token.Error())
+		log.Println(token.Error())
 		os.Exit(1)
 	}
 	log.Println("Subscribed to /unit/+/")
+
+	// subscribe to version wildcard topic
+	if token := client.Subscribe("/version/+/", byte(qos), nil); token.Wait() && token.Error() != nil {
+		log.Println(token.Error())
+		os.Exit(1)
+	}
+	log.Println("Subscribed to /version/+/")
 }
 
 // HTTP Handlers
@@ -187,29 +204,28 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	oldUnit := dict[params["id"]]
 
-	var temp Unit
-	decodeErr := json.NewDecoder(r.Body).Decode(&temp)
+	var reqData Unit
+	decodeErr := json.NewDecoder(r.Body).Decode(&reqData)
 
 	if decodeErr != nil {
-		log.Println("PUT - failed decoding request")
-		log.Println(decodeErr)
+		checkErr("PUT - failed decoding request", decodeErr)
 		json.NewEncoder(w).Encode(oldUnit)
 		return
 	}
 
-	if (temp.Version != "" && oldUnit.Version != temp.Version) {
-		temp.State = Updating
+	if (reqData.Version != "" && oldUnit.Version != reqData.Version) {
+		reqData.State = Updating
 
 		var msg Msg
 		msg.ID = params["id"]
 		msg.Header = "StartUpdate"
-		msg.Version = temp.Version
+		msg.Version = reqData.Version
 		go publishMsg(oldUnit.BeanID, msg)
 	}
 
-	dict[params["id"]] = temp
+	dict[params["id"]] = reqData
 	
-	json.NewEncoder(w).Encode(temp)
+	json.NewEncoder(w).Encode(reqData)
 }
 
 func deleteUnit(w http.ResponseWriter, r *http.Request) {
@@ -220,6 +236,12 @@ func deleteUnit(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(dict)
 }
 
+func getVersions(w http.ResponseWriter, r *http.Request) {
+	log.Println("GET - get versions endpoint hit")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(versions)
+}
+
 func makeHTTPServer() *http.Server {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/units/", getUnits).Methods("GET")
@@ -227,6 +249,7 @@ func makeHTTPServer() *http.Server {
 	router.HandleFunc("/api/units", createUnit).Methods("POST")
 	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
 	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
+	router.HandleFunc("/api/versions/", getVersions).Methods("GET")
 
 	router.PathPrefix("/lab/").Handler(http.StripPrefix("/lab/", http.FileServer(http.Dir("lab/"))))
 
@@ -243,6 +266,7 @@ func main() {
 	
 	// data TODO: implement db
 	dict = make(map[string]Unit)
+	versions = make([]string, 0)
 	fakeData()
 
 	// this section makes sure we have a valid cert
