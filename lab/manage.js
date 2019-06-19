@@ -17,8 +17,8 @@ $(document).ready(function() {
     })
 })
 
+// REPEAT: Wait thirty seconds, get data from backend, update the UI
 function poll() {
-    console.log('polling server')
     setTimeout(() => {
         $.ajax({
             type: 'GET',
@@ -33,6 +33,7 @@ function poll() {
     }, interval)
 }
 
+// Listens for textbox changes
 function boxListener(element) {
     let id = element.id.split(' ')
     let name = element.value
@@ -99,7 +100,8 @@ function dropdownListener(element) {
     })
 
     dict[key].state = 1
-    $('#icon ' + key).replaceWith(makeIcon(key, 1))
+    let iconID = '#icon ' + key
+    $(iconID).replaceWith(makeIcon(key, 1))
 }
 
 function buildTable() {

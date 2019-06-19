@@ -1,9 +1,5 @@
 nohup.out
 sbc-pi-backend
-*.sh
-
-prod/
-temp/
 
 *.exe
 

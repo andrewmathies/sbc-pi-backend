@@ -9,3 +9,7 @@ td, tr {
 table {
   margin-top: 2em;
 }
+
+body {
+  font-family: 'Roboto', sans-serif;
+}

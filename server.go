@@ -12,15 +12,18 @@ import (
 	"os"
 	"strings"
 
+	"bg"
+
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 	"github.com/gorilla/mux"
 	"github.com/segmentio/ksuid"
-	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
-var dict map[string]Unit
+// Globals
 
+type Unit bg.Unit
+type Msg bg.Msg
 type State int
 
 const (
@@ -29,130 +32,30 @@ const (
 	Failed		State = 2
 )
 
-type Unit struct {
-	Version string 	`json:"version"`
-	BeanID 	string 	`json:"beanID"`
-	Name	string	`json:"name"`
-	State	State	`json:"state"`
-}
+var dict map[string]Unit
 
-// header is one of: Hello, StartUpdate, Complete, Fail
-type Msg struct {
-	ID		string	`json:"id"`
-	Header	string	`json:"header"`
-	Version	string	`json:"version"`
-}
+// Utility Functions
 
-// Utility
-
-func checkError(message string, err error) {
+func checkErr(message string, err error) {
 	if err != nil {
-		fmt.Println("ERROR: " + message)
-		fmt.Println(err)
-		fmt.Println("")
+		log.Println("ERROR: " + message)
+		log.Println(err)
 	}
 }
 
 func formatRequest(r *http.Request) {
-	requestDump, err := httputil.DumpRequest(r, true)
-	checkError("couldnt format http request", err)
+	requestDump, formatErr := httputil.DumpRequest(r, true)
+	checkErr("couldnt format http request", formatErr)
 	log.Println(string(requestDump))
 }
 
 func fakeData() {
+	dict = make(map[string]Unit)
+
 	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960", State: 0}
 	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo", State: 1}
 	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000", State: 2}
 	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here", State: 1}
-}
-
-// MQTT stuff
-
-var client MQTT.Client
-var qos int
-
-func handleMsg(beanID string, msg Msg) {
-	log.Println("Handling MQTT Message\nBeanID: ", beanID, "\nMsg: ", msg)
-
-	switch msg.Header {
-	case "Hello":
-		// create new unit and stuff it in the dict
-		unit := Unit{Version: msg.Version, BeanID: beanID, Name: "", State: Idle}
-		dict[ksuid.New().String()] = unit
-	case "StartUpdate":
-		// the backend published this, so do nothing
-	case "Complete":
-		// update status of unit and push that to frontend???
-		id := msg.ID
-		unit := dict[id]
-		unit.State = Idle
-		dict[id] = unit
-	case "Fail":
-		// update status of unit and push that to frontend???
-		id := msg.ID
-		unit := dict[id]
-		unit.State = Failed
-		dict[id] = unit
-	default:
-		log.Println("ERROR: unexpected MQTT message ", msg.Header)
-	}
-}
-
-func publishMsg(beanID string, msg Msg) {
-	log.Println("Publishing StartUpdate version on /unit/", beanID, "/")
-	json, encodeErr := json.Marshal(msg)
-	
-	if encodeErr != nil {
-		log.Println("ERROR: couldn't marshal msg for mqtt message ", encodeErr)
-		return
-	}
-
-    token := client.Publish("/unit/" + beanID + "/", byte(qos), false, string(json))
-    token.Wait()
-}
-
-// default message handler
-var f MQTT.MessageHandler = func(client MQTT.Client, mqttMsg MQTT.Message) {
-	var msg Msg
-	unpackErr := json.Unmarshal(mqttMsg.Payload(), &msg)
-	if unpackErr != nil {
-		log.Println("ERROR: couldn't unpack MQTT message ", unpackErr)
-		return
-	}
-
-	topic := mqttMsg.Topic()
-	topicParts := strings.Split(topic, "/")
-	if len(topicParts) != 4 {
-		log.Println("ERROR: badly formed MQTT topic ", topicParts)
-		return
-	}
-
-	beanID := topicParts[2]
-	handleMsg(beanID, msg)
-}
-
-func setupMQTT(tlsConfig *tls.Config) {
-	// opts contains broker address and other config info
-	opts := MQTT.NewClientOptions().AddBroker("tls://saturten.com:8883")
-  	opts.SetClientID("go-simple")
-	opts.SetDefaultPublishHandler(f)
-	opts.SetTLSConfig(tlsConfig)
-	opts.SetUsername("andrew")
-	opts.SetPassword("1plus2is3")
-	
-	// initiate connection with broker
-	client = MQTT.NewClient(opts)
-  	if token := client.Connect(); token.Wait() && token.Error() != nil {
-    	panic(token.Error())
-	}
-	log.Println("Connected to MQTT broker")
-	
-	// subscribe to wildcard topic
-	if token := client.Subscribe("/unit/+/", byte(qos), nil); token.Wait() && token.Error() != nil {
-		fmt.Println(token.Error())
-		os.Exit(1)
-	}
-	log.Println("Subscribed to /unit/+/")
 }
 
 // HTTP Handlers
@@ -204,7 +107,7 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 		msg.ID = params["id"]
 		msg.Header = "StartUpdate"
 		msg.Version = temp.Version
-		go publishMsg(oldUnit.BeanID, msg)
+		go bg.publishMsg(oldUnit.BeanID, msg)
 	}
 
 	dict[params["id"]] = temp
@@ -220,31 +123,7 @@ func deleteUnit(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(dict)
 }
 
-func makeHTTPServer() *http.Server {
-	router := mux.NewRouter()
-	router.HandleFunc("/api/units/", getUnits).Methods("GET")
-	router.HandleFunc("/api/units/{id}", getUnit).Methods("GET")
-	router.HandleFunc("/api/units", createUnit).Methods("POST")
-	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
-	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
-
-	router.PathPrefix("/lab/").Handler(http.StripPrefix("/lab/", http.FileServer(http.Dir("lab/"))))
-
-	return &http.Server{
-        ReadTimeout:  5 * time.Second,
-        WriteTimeout: 5 * time.Second,
-        IdleTimeout:  120 * time.Second,
-        Handler:      router,
-    }
-}
-
-func main() {
-	log.Println("Starting Backend")
-	
-	// data TODO: implement db
-	dict = make(map[string]Unit)
-	fakeData()
-
+func getTLSConfig() *tls.Config {
 	// this section makes sure we have a valid cert
 	var m *autocert.Manager
 	var server *http.Server
@@ -265,18 +144,46 @@ func main() {
 		Cache:      autocert.DirCache(certPath),
 	}
 
-	tlsConfig := &tls.Config{GetCertificate: m.GetCertificate}
+	tlsConfig := &tls.Config{ GetCertificate: m.GetCertificate }
+	tlsConfig.NextProtos = append(tlsConfig.NextProtos, acme.ALPNProto)
 
-	// mqtt client
-	qos = 1
-	go setupMQTT(tlsConfig)
+	return tlsConfig
+}
 
-	// build and run the https server
-	server = makeHTTPServer()
-	server.Addr = ":443"
-	server.TLSConfig = tlsConfig
-	server.TLSConfig.NextProtos = append(server.TLSConfig.NextProtos, acme.ALPNProto)
+func httpServer(tlsConfig *tls.Config) {
+	router := mux.NewRouter()
+
+	// REST API
+	router.HandleFunc("/api/units/", getUnits).Methods("GET")
+	router.HandleFunc("/api/units/{id}", getUnit).Methods("GET")
+	router.HandleFunc("/api/units", createUnit).Methods("POST")
+	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
+	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
+
+	// FRONTEND
+	router.PathPrefix("/lab/").Handler(http.StripPrefix("/lab/", http.FileServer(http.Dir("lab/"))))
+
+	server := &http.Server{
+    	ReadTimeout:	5 * time.Second,
+        WriteTimeout:	5 * time.Second,
+        IdleTimeout:	120 * time.Second,
+		Handler:		router,
+		Addr: 			":443"
+		TLSConfig: 		tlsConfig
+	}
 
 	log.Println("Starting server on ", server.Addr)
 	log.Fatal(server.ListenAndServeTLS("", ""))
+}
+
+func main() {
+	log.Println("Starting Backend")
+	
+	// TODO: implement db
+	fakeData()
+
+	tlsConfig := getTLSConfig()
+
+	go bg.initMQTT(tlsConfig)
+	httpServer(tlsConfig)
 }
