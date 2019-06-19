@@ -143,9 +143,15 @@ function buildTable() {
         let dropdown = $('<select id="select ' + key + '" onchange="dropdownListener(this)"/>').appendTo(versionElement)
         dropdown.value = curUnit.version
 
+        let hasNoOption = true
         versionOptions.forEach(val => {
+            hasNoOption = hasNoOption && val !== curUnit.version
             $('<option />', {value: val, text: val, selected: val === curUnit.version}).appendTo(dropdown)
         })
+
+        if (hasNoOption) {
+            $('<option />', {text: '', selected: true}).appendTo(dropdown)
+        }
         
         beanElement.append($('<div>').html(curUnit.beanID))
         stateElement.append(makeIcon(key, curUnit.state))
