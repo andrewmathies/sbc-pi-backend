@@ -5,6 +5,7 @@ import (
 	"net/http/httputil"
 	"crypto/tls"
 	"encoding/json"
+	"hash/fnv"
 	"fmt"
 	"log"
 	"context"
@@ -20,7 +21,7 @@ import (
 )
 
 var dict map[string]Unit
-var versions []string
+var versions map[uint64]string
 
 type State int
 
@@ -58,6 +59,12 @@ func formatRequest(r *http.Request) {
 	requestDump, err := httputil.DumpRequest(r, true)
 	checkErr("couldnt format http request", err)
 	log.Println(string(requestDump))
+}
+
+func hash(s string) uint64 {
+	h := fnv.New64a()
+	h.Write([]byte(s))
+	return h.Sum64()
 }
 
 func fakeData() {
@@ -120,8 +127,9 @@ var f MQTT.MessageHandler = func(client MQTT.Client, mqttMsg MQTT.Message) {
 	log.Println("recieved msg on topic: " + topicParts[1])
 	
 	if topicParts[1] == "version" {
-		versions = append(versions, topicParts[2])
-		log.Println("adding " + topicParts[2] + " to versions list")
+		key := hash(topicParts[2])
+		versions[key] = topicParts[2]
+		log.Println("adding " + topicParts[2] + " to versions map")
 		return
 	}
 
@@ -266,7 +274,7 @@ func main() {
 	
 	// data TODO: implement db
 	dict = make(map[string]Unit)
-	versions = make([]string, 0)
+	versions = make(map[uint64]string)
 	fakeData()
 
 	// this section makes sure we have a valid cert
