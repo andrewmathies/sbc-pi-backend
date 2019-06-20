@@ -12,6 +12,7 @@ import (
 	"time"
 	"os"
 	"strings"
+	"strconv"
 
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
@@ -39,7 +40,7 @@ type Unit struct {
 
 // header is one of: Hello, StartUpdate, Complete, Fail
 type Msg struct {
-	ID		string	`json:"id"`
+	ID		uint64	`json:"id"`
 	Header	string	`json:"header"`
 	Version	string	`json:"version"`
 }
@@ -64,6 +65,12 @@ func hash(s string) uint64 {
 	h := fnv.New64a()
 	h.Write([]byte(s))
 	return h.Sum64()
+}
+
+func convert(s string) uint64 {
+	num, convErr := strconv.Atoi(s)
+	checkErr("converting string to uint64", convErr)
+	return num
 }
 
 func fakeData() {
@@ -201,7 +208,7 @@ func getUnit(w http.ResponseWriter, r *http.Request) {
 	log.Println("GET - getUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	unit := dict[params["id"]]
+	unit := dict[convert(params["id"])]
 	json.NewEncoder(w).Encode(unit)
 }
 
@@ -219,7 +226,8 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 	log.Println("PUT - updateUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	oldUnit := dict[params["id"]]
+	key := convert(params["id"])
+	oldUnit := dict[key]
 
 	var reqData Unit
 	decodeErr := json.NewDecoder(r.Body).Decode(&reqData)
@@ -234,13 +242,13 @@ func updateUnit(w http.ResponseWriter, r *http.Request) {
 		reqData.State = Updating
 
 		var msg Msg
-		msg.ID = params["id"]
+		msg.ID = key
 		msg.Header = "StartUpdate"
 		msg.Version = reqData.Version
 		go publishMsg(oldUnit.BeanID, msg)
 	}
 
-	dict[params["id"]] = reqData
+	dict[key] = reqData
 	
 	json.NewEncoder(w).Encode(reqData)
 }
@@ -249,7 +257,7 @@ func deleteUnit(w http.ResponseWriter, r *http.Request) {
 	log.Println("DELETE - deleteUnit hit")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	delete(dict, params["id"])
+	delete(dict, convert(params["id"]))
 	json.NewEncoder(w).Encode(dict)
 }
 
@@ -319,7 +327,7 @@ func main() {
 	go setupMQTT(tlsConfig)
 
 	// build and run the https server
-	server = makeHTTPServer(tlsConfig)
+	server := makeHTTPServer(tlsConfig)
 
 	log.Println("Starting server on ", server.Addr)
 	log.Fatal(server.ListenAndServeTLS("", ""))
