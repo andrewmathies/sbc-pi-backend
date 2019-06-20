@@ -67,7 +67,7 @@ func hash(s string) uint64 {
 }
 
 func fakeData() {
-	dict = make(map[string]Unit)
+	dict = make(map[uint64]Unit)
 	versions = make(map[uint64]string)
 
 	dict[hash("12123434")] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960", State: 0}
@@ -210,7 +210,7 @@ func createUnit(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var unit Unit
 	_ = json.NewDecoder(r.Body).Decode(&unit)
-	id := ksuid.New().String()
+	id := hash("test")
 	dict[id] = unit
 	json.NewEncoder(w).Encode(unit)
 }
@@ -276,7 +276,7 @@ func makeHTTPServer(tlsConfig *tls.Config) *http.Server {
         IdleTimeout:  	120 * time.Second,
 		Handler:      	router,
 		Addr:			":443",
-		TLSConfig:		tlsConfig
+		TLSConfig:		tlsConfig,
     }
 }
 
