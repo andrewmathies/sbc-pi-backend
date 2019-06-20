@@ -16,11 +16,10 @@ import (
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 	"github.com/gorilla/mux"
-	"github.com/segmentio/ksuid"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
-var dict map[string]Unit
+var dict map[uint64]Unit
 var versions map[uint64]string
 
 type State int
@@ -68,10 +67,13 @@ func hash(s string) uint64 {
 }
 
 func fakeData() {
-	dict[ksuid.New().String()] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960", State: 0}
-	dict[ksuid.New().String()] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo", State: 1}
-	dict[ksuid.New().String()] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000", State: 2}
-	dict[ksuid.New().String()] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here", State: 1}
+	dict = make(map[string]Unit)
+	versions = make(map[uint64]string)
+
+	dict[hash("12123434")] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960", State: 0}
+	dict[hash("00009999")] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo", State: 1}
+	dict[hash("98765432")] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000", State: 2}
+	dict[hash("44553322")] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here", State: 1}
 }
 
 // MQTT stuff
@@ -86,7 +88,12 @@ func handleMsg(beanID string, msg Msg) {
 	case "Hello":
 		// create new unit and stuff it in the dict
 		unit := Unit{Version: msg.Version, BeanID: beanID, Name: "", State: Idle}
-		dict[ksuid.New().String()] = unit
+		key := hash(beanID)
+		if val, ok := dict[key]; ok {
+			log.Println("key for bean ID: " + beanID + " already exists")
+		} else {
+			dict[key] = unit
+		}
 	case "StartUpdate":
 		// the backend published this, so do nothing
 	case "Complete":
@@ -157,6 +164,8 @@ func setupMQTT(tlsConfig *tls.Config) {
 	opts.SetTLSConfig(tlsConfig)
 	opts.SetUsername("andrew")
 	opts.SetPassword("1plus2is3")
+
+	qos = 1
 	
 	// initiate connection with broker
 	client = MQTT.NewClient(opts)
@@ -250,7 +259,7 @@ func getVersions(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(versions)
 }
 
-func makeHTTPServer() *http.Server {
+func makeHTTPServer(tlsConfig *tls.Config) *http.Server {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/units/", getUnits).Methods("GET")
 	router.HandleFunc("/api/units/{id}", getUnit).Methods("GET")
@@ -262,21 +271,16 @@ func makeHTTPServer() *http.Server {
 	router.PathPrefix("/lab/").Handler(http.StripPrefix("/lab/", http.FileServer(http.Dir("lab/"))))
 
 	return &http.Server{
-        ReadTimeout:  5 * time.Second,
-        WriteTimeout: 5 * time.Second,
-        IdleTimeout:  120 * time.Second,
-        Handler:      router,
+        ReadTimeout:  	5 * time.Second,
+        WriteTimeout: 	5 * time.Second,
+        IdleTimeout:  	120 * time.Second,
+		Handler:      	router,
+		Addr:			":443",
+		TLSConfig:		tlsConfig
     }
 }
 
-func main() {
-	log.Println("Starting Backend")
-	
-	// data TODO: implement db
-	dict = make(map[string]Unit)
-	versions = make(map[uint64]string)
-	fakeData()
-
+func getTlsConfig() *tls.Config {
 	// this section makes sure we have a valid cert
 	var m *autocert.Manager
 	var server *http.Server
@@ -297,17 +301,25 @@ func main() {
 		Cache:      autocert.DirCache(certPath),
 	}
 
-	tlsConfig := &tls.Config{GetCertificate: m.GetCertificate}
+	config := &tls.Config{GetCertificate: m.GetCertificate}
+	config.NextProtos = append(tlsConfig.NextProtos, acme.ALPNProto)
+
+	return config
+}
+
+func main() {
+	log.Println("Starting Backend")
+	
+	// data TODO: implement db
+	fakeData()
+
+	tlsConfig := getTlsConfig()
 
 	// mqtt client
-	qos = 1
 	go setupMQTT(tlsConfig)
 
 	// build and run the https server
-	server = makeHTTPServer()
-	server.Addr = ":443"
-	server.TLSConfig = tlsConfig
-	server.TLSConfig.NextProtos = append(server.TLSConfig.NextProtos, acme.ALPNProto)
+	server = makeHTTPServer(tlsConfig)
 
 	log.Println("Starting server on ", server.Addr)
 	log.Fatal(server.ListenAndServeTLS("", ""))
