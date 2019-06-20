@@ -97,7 +97,7 @@ func handleMsg(beanID string, msg Msg) {
 		unit := Unit{Version: msg.Version, BeanID: beanID, Name: "", State: Idle}
 		key := hash(beanID)
 		if val, ok := dict[key]; ok {
-			log.Println("key for bean ID: " + beanID + " already exists")
+			log.Println("key for bean ID: " + val.BeanID + " already exists")
 		} else {
 			dict[key] = unit
 		}
@@ -291,7 +291,6 @@ func makeHTTPServer(tlsConfig *tls.Config) *http.Server {
 func getTlsConfig() *tls.Config {
 	// this section makes sure we have a valid cert
 	var m *autocert.Manager
-	var server *http.Server
 
 	hostPolicy := func(ctx context.Context, host string) error {
 		allowedHost := "saturten.com"
