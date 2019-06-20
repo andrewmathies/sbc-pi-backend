@@ -67,8 +67,8 @@ func hash(s string) uint64 {
 	return h.Sum64()
 }
 
-func convert(s string) uint64 {
-	num, convErr := strconv.Atoi(s)
+func convert(s string) uint64 {	
+	num, convErr := strconv.ParseUint(s, 10, 64)
 	checkErr("converting string to uint64", convErr)
 	return num
 }
@@ -310,7 +310,7 @@ func getTlsConfig() *tls.Config {
 	}
 
 	config := &tls.Config{GetCertificate: m.GetCertificate}
-	config.NextProtos = append(tlsConfig.NextProtos, acme.ALPNProto)
+	config.NextProtos = append(config.NextProtos, acme.ALPNProto)
 
 	return config
 }
