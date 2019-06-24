@@ -76,11 +76,12 @@ func convert(s string) uint64 {
 func fakeData() {
 	dict = make(map[uint64]Unit)
 	versions = make(map[uint64]string)
-
+/*
 	dict[hash("12123434")] = Unit{Version: "2.3.4.5", BeanID: "12123434", Name: "ps960", State: 0}
 	dict[hash("00009999")] = Unit{Version: "2.12.44.0", BeanID: "00009999", Name: "mangoooo", State: 1}
 	dict[hash("98765432")] = Unit{Version: "1.9.8.7", BeanID: "98765432", Name: "PKD7000", State: 2}
 	dict[hash("44553322")] = Unit{Version: "2.27", BeanID: "44553322", Name: "insert fake name here", State: 1}
+*/
 }
 
 // MQTT stuff
