@@ -121,7 +121,7 @@ func handleMsg(beanID string, msg Msg) {
 }
 
 func publishMsg(beanID string, msg Msg) {
-	log.Println("Publishing StartUpdate version on /unit/", beanID, "/")
+	log.Println("Publishing StartUpdate version on unit/", beanID, "/")
 	json, encodeErr := json.Marshal(msg)
 	
 	if encodeErr != nil {
@@ -129,7 +129,7 @@ func publishMsg(beanID string, msg Msg) {
 		return
 	}
 
-    token := client.Publish("/unit/" + beanID + "/", byte(qos), false, string(json))
+    token := client.Publish("unit/" + beanID + "/", byte(qos), false, string(json))
     token.Wait()
 }
 
@@ -138,16 +138,16 @@ var f MQTT.MessageHandler = func(client MQTT.Client, mqttMsg MQTT.Message) {
 	topic := mqttMsg.Topic()
 	topicParts := strings.Split(topic, "/")
 
-	log.Println("recieved msg on topic: " + topicParts[1])
+	log.Println("recieved msg on topic: " + topicParts[0])
 	
-	if topicParts[1] == "version" {
-		key := hash(topicParts[2])
-		versions[key] = topicParts[2]
-		log.Println("adding " + topicParts[2] + " to versions map")
+	if topicParts[0] == "version" {
+		key := hash(topicParts[1])
+		versions[key] = topicParts[1]
+		log.Println("adding " + topicParts[1] + " to versions map")
 		return
 	}
 
-	if len(topicParts) != 4 {
+	if len(topicParts) != 3 {
 		log.Println("ERROR: badly formed MQTT topic ", topicParts)
 		return
 	}
@@ -159,7 +159,7 @@ var f MQTT.MessageHandler = func(client MQTT.Client, mqttMsg MQTT.Message) {
 		return
 	}
 
-	beanID := topicParts[2]
+	beanID := topicParts[1]
 	handleMsg(beanID, msg)
 }
 
@@ -182,18 +182,18 @@ func setupMQTT(tlsConfig *tls.Config) {
 	log.Println("Connected to MQTT broker")
 	
 	// subscribe to unit wildcard topic
-	if token := client.Subscribe("/unit/+/", byte(qos), nil); token.Wait() && token.Error() != nil {
+	if token := client.Subscribe("unit/+/", byte(qos), nil); token.Wait() && token.Error() != nil {
 		log.Println(token.Error())
 		os.Exit(1)
 	}
-	log.Println("Subscribed to /unit/+/")
+	log.Println("Subscribed to unit/+/")
 
 	// subscribe to version wildcard topic
-	if token := client.Subscribe("/version/+/", byte(qos), nil); token.Wait() && token.Error() != nil {
+	if token := client.Subscribe("version/+/", byte(qos), nil); token.Wait() && token.Error() != nil {
 		log.Println(token.Error())
 		os.Exit(1)
 	}
-	log.Println("Subscribed to /version/+/")
+	log.Println("Subscribed to version/+/")
 }
 
 // HTTP Handlers
