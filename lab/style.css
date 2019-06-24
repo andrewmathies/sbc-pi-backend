@@ -5,16 +5,33 @@ td, tr {
 table {
 	margin-top: 2em;
 	margin-left: auto;
-	margin-right: auto;
+    margin-right: auto;
+    border-spacing: 0px;
+    border-collapse: collapse;
 }
 
 body {
-	font-family: 'Roboto', sans-serif;
-	background-image: url("https://s3.amazonaws.com/noupe/2009/10/pattern-34.jpg")
+	font-family: 'PT Serif', serif;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f5f6f6+0,dbdce2+21,b8bac6+49,dddfe3+80,f5f6f6+100;Grey+Pipe */
+    /*background: rgb(245,246,246); /* Old browsers */
+    /*background: -moz-linear-gradient(top,  rgba(245,246,246,1) 0%, rgba(219,220,226,1) 21%, rgba(184,186,198,1) 49%, rgba(221,223,227,1) 80%, rgba(245,246,246,1) 100%); /* FF3.6-15 */
+    /*background: -webkit-linear-gradient(top,  rgba(245,246,246,1) 0%,rgba(219,220,226,1) 21%,rgba(184,186,198,1) 49%,rgba(221,223,227,1) 80%,rgba(245,246,246,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    /*background: linear-gradient(to bottom,  rgba(245,246,246,1) 0%,rgba(219,220,226,1) 21%,rgba(184,186,198,1) 49%,rgba(221,223,227,1) 80%,rgba(245,246,246,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    /*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f6f6', endColorstr='#f5f6f6',GradientType=0 ); /* IE6-9 */
+
+/* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f5f6f6+0,dbdce2+10,b8bac6+50,dddfe3+90,f5f6f6+100 */
+background: rgb(245,246,246); /* Old browsers */
+background: -moz-linear-gradient(left,  rgba(245,246,246,1) 0%, rgba(219,220,226,1) 10%, rgba(184,186,198,1) 50%, rgba(221,223,227,1) 90%, rgba(245,246,246,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(left,  rgba(245,246,246,1) 0%,rgba(219,220,226,1) 10%,rgba(184,186,198,1) 50%,rgba(221,223,227,1) 90%,rgba(245,246,246,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to right,  rgba(245,246,246,1) 0%,rgba(219,220,226,1) 10%,rgba(184,186,198,1) 50%,rgba(221,223,227,1) 90%,rgba(245,246,246,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f6f6', endColorstr='#f5f6f6',GradientType=1 ); /* IE6-9 */
+
+
 }
 
 h1 {
-	text-align: center;
+    text-align: center;
+    color: rgb(73,73,73);
 }
 
 td {
@@ -22,18 +39,22 @@ td {
 }
 
 thead th {
-    background-color: #DDEFEF;
-    border: solid 1px #DDEEEE;
-    color: #336B6B;
-    padding: 10px;
-    text-align: left;
+    background-color: rgb(227,242,253);
+    border: solid 1px rgb(60,65,68);
+    color: rgb(60,65,68);
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
     text-shadow: 1px 1px 1px #fff;
 }
 
 tbody td {
-    background-color: #DDEFEF;
-    border: solid 1px #DDEEEE;
-    color: #333;
-    padding: 10px;
+    background-color: rgb(227,242,253);
+    border: solid 1px rgb(60,65,68);
+    color: rgb(60,65,68);
+    padding-top: 12px;
+    padding-bottom: 12px;
     text-shadow: 1px 1px 1px #fff;
+    text-align: center;
+    
 }
