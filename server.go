@@ -104,16 +104,16 @@ func handleMsg(beanID string, msg Msg) {
 		}
 	case "StartUpdate":
 		// the backend published this, so do nothing
-	case "Complete":
+	case "Success":
 		// update status of unit and push that to frontend???
-		id := msg.ID
-		unit := dict[id]
+		key := hash(beanID)
+		unit := dict[key]
 		unit.State = Idle
 		dict[id] = unit
 	case "Fail":
 		// update status of unit and push that to frontend???
-		id := msg.ID
-		unit := dict[id]
+		key := hash(beanID)
+		unit := dict[key]
 		unit.State = Failed
 		dict[id] = unit
 	default:
