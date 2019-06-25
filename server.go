@@ -109,13 +109,13 @@ func handleMsg(beanID string, msg Msg) {
 		key := hash(beanID)
 		unit := dict[key]
 		unit.State = Idle
-		dict[id] = unit
+		dict[key] = unit
 	case "Fail":
 		// update status of unit and push that to frontend???
 		key := hash(beanID)
 		unit := dict[key]
 		unit.State = Failed
-		dict[id] = unit
+		dict[key] = unit
 	default:
 		log.Println("ERROR: unexpected MQTT message ", msg.Header)
 	}

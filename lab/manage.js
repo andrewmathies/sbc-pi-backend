@@ -1,5 +1,5 @@
-let dict = []
-let versionOptions
+let dict = {}
+let versionOptions = []
 let versionData = false, unitData = false
 
 const interval = 5000
@@ -119,8 +119,7 @@ function dropdownListener(element) {
     })
 
     dict[key].state = 1
-	let iconID = '#icon ' + key
-    $(iconID).replaceWith(makeIcon(key, 1))
+    $('#icon-' + key).replaceWith(makeIcon(key))
 }
 
 function buildTable() {
@@ -154,21 +153,23 @@ function buildTable() {
         }
         
         beanElement.append($('<div>').html(curUnit.beanID))
-        stateElement.append(makeIcon(key, curUnit.state))
+        stateElement.append(makeIcon(key))
     }
 }
 
-function makeIcon(key, state) {
+function makeIcon(key) {
+    let state = dict[key].state
+
     switch (state) {
         case 0:
             //idle
-            return $('<i id="icon ' + key + '" class="fas fa-check-circle" style="color: #34C53C">')
+            return $('<i id="icon-' + key + '" class="fas fa-check-circle" style="color: #34C53C">')
         case 1:
             // updating
-            return $('<i id="icon ' + key + '" class="fas fa-spinner fa-pulse" style="color: #61D7FF">')
+            return $('<i id="icon-' + key + '" class="fas fa-spinner fa-pulse" style="color: #61D7FF">')
         case 2:
             // failed
-            return $('<i id="icon ' + key + '" class="fas fa-times-circle" style="color: #FF0104">')
+            return $('<i id="icon-' + key + '" class="fas fa-times-circle" style="color: #FF0104">')
         default:
             console.log('unexpected state in units response: ' + state)
             return
