@@ -1,11 +1,12 @@
-let dict = {}
-let versionOptions = []
+let dict = {}//{"17867974393591147666":{"version":"3.30","beanID":"720008e5","name":"","state":2},"17954946862877046502":{"version":"3.31","beanID":"72000886","name":"C2S950","state":0},"3818512707708119105":{"version":"3.31","beanID":"72001664","name":"C2S900, needs a UPD","state":1},"8843070808735976599":{"version":"2.30","beanID":"72000bfa","name":"","state":0}}
+let versionOptions = []//["3.30", "3.31"]
 let versionData = false, unitData = false
 
 const interval = 5000
 
 $(document).ready(function() {
     console.log('Getting data')
+    //buildTable()
 
 	$.ajax({
 		type: 'GET',
@@ -99,6 +100,18 @@ function dropdownListener(element) {
     }
 
     console.log('select change, key: ' + key + ', version: ' + version)
+
+    let name = ''
+
+    if (dict[key].name) {
+        name = dict[key].name
+    } else {
+        name = dict[key].beanID
+    }
+
+    if (!confirm('Do you want to update ' + name + ' to ' + version + '?')) {
+        return
+    }
 
     params = {
         version: version,
