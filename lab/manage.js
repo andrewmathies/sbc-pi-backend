@@ -1,12 +1,13 @@
-let dict = {}//{"17867974393591147666":{"version":"3.30","beanID":"720008e5","name":"","state":2},"17954946862877046502":{"version":"3.31","beanID":"72000886","name":"C2S950","state":0},"3818512707708119105":{"version":"3.31","beanID":"72001664","name":"C2S900, needs a UPD","state":1},"8843070808735976599":{"version":"2.30","beanID":"72000bfa","name":"","state":0}}
-let versionOptions = []//["3.30", "3.31"]
+let dict = {}
+let versionOptions = []
 let versionData = false, unitData = false
 
 const interval = 5000
 
 $(document).ready(function() {
     console.log('Getting data')
-    //buildTable()
+	//fakeData()
+	initWorker()
 
 	$.ajax({
 		type: 'GET',
@@ -37,6 +38,49 @@ $(document).ready(function() {
 		}
     })
 })
+
+function initWorker() {
+	// taken from https://developers.google.com/web/fundamentals/primers/service-workers/
+	if ('serviceWorker' in navigator) {
+    	navigator.serviceWorker.register('/lab/getData.js').then(
+			function(registration) {
+      			// Registration was successful
+      			console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    		}, function(err) {
+      			// registration failed :(
+      			console.log('ServiceWorker registration failed: ', err);
+    		}
+		);
+	}
+}
+
+function fakeData() {
+	dict = {
+		"17867974393591147666": {
+				"version":"3.30",
+				"beanID":"720008e5",
+				"name":"",
+				"state":2
+		},"17954946862877046502": {
+				"version":"3.31",
+				"beanID":"72000886",
+				"name":"C2S950",
+				"state":0
+		},"3818512707708119105": {
+				"version":"3.31",
+				"beanID":"72001664",
+				"name":"C2S900, needs a UPD",
+				"state":1
+		},"8843070808735976599": {
+				"version":"2.30",
+				"beanID":"72000bfa",
+				"name":"",
+				"state":0
+		}
+	}
+	
+	versionOptions = ["3.30", "3.31"]
+}
 
 function poll() {
     //console.log('polling server')
