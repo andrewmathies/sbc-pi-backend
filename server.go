@@ -268,6 +268,13 @@ func getVersions(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(versions)
 }
 
+func cd(w http.ResponseWriter, r *http.Request) {
+	log.Println("continuos deployment endpoint hit")
+	w.Header().Set("Content-Type", "application/json")
+	formatRequest(r)
+	json.NewEncoder(w).Encode("hello")
+}
+
 func makeHTTPServer(tlsConfig *tls.Config) *http.Server {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/units/", getUnits).Methods("GET")
@@ -276,6 +283,8 @@ func makeHTTPServer(tlsConfig *tls.Config) *http.Server {
 	router.HandleFunc("/api/units/{id}", updateUnit).Methods("PUT")
 	router.HandleFunc("/api/units/{id}", deleteUnit).Methods("DELETE")
 	router.HandleFunc("/api/versions/", getVersions).Methods("GET")
+
+	router.HandleFunc("/pi-continuous-deployment", cd).Methods("POST")
 
 	router.PathPrefix("/lab/").Handler(http.StripPrefix("/lab/", http.FileServer(http.Dir("lab/"))))
 
