@@ -30,7 +30,7 @@ $(document).ready(function() {
         success: (resp) => { 
             dict = resp
 			buildTable()
-            poll()
+            //poll()
         },
 		failure: (resp) => {
 			console.log('request to get units failed')
